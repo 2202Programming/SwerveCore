@@ -4,8 +4,8 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.sensors.CANCoder;
+import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotMap;
 
 public class SwerveDrivetrain extends SubsystemBase {
 
@@ -54,13 +55,20 @@ public class SwerveDrivetrain extends SubsystemBase {
 
   private final AnalogGyro gyro = new AnalogGyro(0);
 
-  // TODO: Update these CAN device IDs to match your TalonFX + CANCoder device IDs
   // TODO: Update module offsets to match your CANCoder offsets
   private SwerveModuleMK3[] modules = new SwerveModuleMK3[] {
-    new SwerveModuleMK3(new TalonFX(1), new TalonFX(2), new CANCoder(0), Rotation2d.fromDegrees(0)), // Front Left
-    new SwerveModuleMK3(new TalonFX(3), new TalonFX(4), new CANCoder(1), Rotation2d.fromDegrees(0)), // Front Right
-    new SwerveModuleMK3(new TalonFX(5), new TalonFX(6), new CANCoder(2), Rotation2d.fromDegrees(0)), // Back Left
-    new SwerveModuleMK3(new TalonFX(7), new TalonFX(8), new CANCoder(3), Rotation2d.fromDegrees(0))  // Back Right
+    new SwerveModuleMK3(new CANSparkMax(RobotMap.DRIVETRAIN_FRONT_LEFT_DRIVE_MOTOR, 
+      CANSparkMax.MotorType.kBrushless), new CANSparkMax(RobotMap.DRIVETRAIN_FRONT_LEFT_ANGLE_MOTOR, 
+      CANSparkMax.MotorType.kBrushless), new CANCoder(RobotMap.DRIVETRAIN_FRONT_LEFT_ENCODER), Rotation2d.fromDegrees(0)), // Front Left
+    new SwerveModuleMK3(new CANSparkMax(RobotMap.DRIVETRAIN_FRONT_RIGHT_DRIVE_MOTOR, 
+      CANSparkMax.MotorType.kBrushless), new CANSparkMax(RobotMap.DRIVETRAIN_FRONT_RIGHT_ANGLE_MOTOR, 
+      CANSparkMax.MotorType.kBrushless), new CANCoder(RobotMap.DRIVETRAIN_FRONT_RIGHT_ENCODER), Rotation2d.fromDegrees(0)), // Front Right
+    new SwerveModuleMK3(new CANSparkMax(RobotMap.DRIVETRAIN_BACK_LEFT_DRIVE_MOTOR, 
+      CANSparkMax.MotorType.kBrushless), new CANSparkMax(RobotMap.DRIVETRAIN_BACK_LEFT_ANGLE_MOTOR, 
+      CANSparkMax.MotorType.kBrushless),new CANCoder(RobotMap.DRIVETRAIN_BACK_LEFT_ENCODER), Rotation2d.fromDegrees(0)), // Back Left
+    new SwerveModuleMK3(new CANSparkMax(RobotMap.DRIVETRAIN_BACK_RIGHT_DRIVE_MOTOR, 
+      CANSparkMax.MotorType.kBrushless), new CANSparkMax(RobotMap.DRIVETRAIN_BACK_RIGHT_ANGLE_MOTOR, 
+      CANSparkMax.MotorType.kBrushless), new CANCoder(RobotMap.DRIVETRAIN_BACK_RIGHT_ENCODER), Rotation2d.fromDegrees(0))  // Back Right
   };
 
   public SwerveDrivetrain() {

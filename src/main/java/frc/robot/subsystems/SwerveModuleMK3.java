@@ -7,10 +7,13 @@ import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.CANCoderConfiguration;
+import com.revrobotics.CANPIDController;
+import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.util.Units;
+import frc.robot.util.misc.PIDFController;
 
 public class SwerveModuleMK3 {
 
@@ -27,11 +30,11 @@ public class SwerveModuleMK3 {
   // CANCoder has 4096 ticks/rotation
   private static double kEncoderTicksPerRotation = 4096;
 
-  private TalonFX driveMotor;
-  private TalonFX angleMotor;
+  private CANSparkMax driveMotor;
+  private CANSparkMax angleMotor;
   private CANCoder canCoder;
 
-  public SwerveModuleMK3(TalonFX driveMotor, TalonFX angleMotor, CANCoder canCoder, Rotation2d offset) {
+  public SwerveModuleMK3(CANSparkMax driveMotor, CANSparkMax angleMotor, CANCoder canCoder, Rotation2d offset) {
     this.driveMotor = driveMotor;
     this.angleMotor = angleMotor;
     this.canCoder = canCoder;
