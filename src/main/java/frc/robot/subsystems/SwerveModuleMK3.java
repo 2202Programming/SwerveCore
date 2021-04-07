@@ -5,6 +5,7 @@ import com.ctre.phoenix.sensors.CANCoderConfiguration;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.ControlType;
 
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
@@ -23,7 +24,7 @@ public class SwerveModuleMK3 {
   private static final double kAngleI = 0.0;
   private static final double kAngleD = 0.0;
 
-  // CANCoder has 4096 ticks/rotation
+  // CANCoder has 4096 ticks/rotation (neo has 42 ticks per rotation)
   private static double kEncoderTicksPerRotation = 4096;
 
   private CANSparkMax driveMotor;
@@ -85,10 +86,10 @@ public class SwerveModuleMK3 {
     // Convert the CANCoder from it's position reading back to ticks
     double currentTicks = canCoder.getPosition() / canCoder.configGetFeedbackCoefficient();
     double desiredTicks = currentTicks + deltaTicks;
-    angleMotor.set(TalonFXControlMode.Position, desiredTicks);
-
+    angleMotorPID.setReference(desiredTicks, ControlType.kPosition);
+  
     double feetPerSecond = Units.metersToFeet(state.speedMetersPerSecond);
-    driveMotor.set(TalonFXControlMode.PercentOutput, feetPerSecond / SwerveDrivetrain.kMaxSpeed);
+    driveMotorPID.setReference(feetPerSecond / SwerveDrivetrain.kMaxSpeed, ControlType.kVelocity);
   }
 
 }
