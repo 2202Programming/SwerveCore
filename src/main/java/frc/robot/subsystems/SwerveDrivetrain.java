@@ -114,15 +114,15 @@ public class SwerveDrivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Left Back Angle", modules[2].getAngle().getDegrees());
     SmartDashboard.putNumber("Right Back Angle", modules[3].getAngle().getDegrees());
 
-    SmartDashboard.putNumber("Left Front Goal RPMs", modules[0].feetPerSecondGoal);
-    SmartDashboard.putNumber("Right Front Goal RPMs", modules[1].feetPerSecondGoal);
-    SmartDashboard.putNumber("Left Back Goal RPMs", modules[2].feetPerSecondGoal);
-    SmartDashboard.putNumber("Right Back Goal RPMs", modules[3].feetPerSecondGoal);
+    SmartDashboard.putNumber("Left Front Goal RPMs", modules[0].RPMGoal);
+    SmartDashboard.putNumber("Right Front Goal RPMs", modules[1].RPMGoal);
+    SmartDashboard.putNumber("Left Back Goal RPMs", modules[2].RPMGoal);
+    SmartDashboard.putNumber("Right Back Goal RPMs", modules[3].RPMGoal);
 
-    SmartDashboard.putNumber("Left Front Goal Angle", modules[0].RPMGoal);
-    SmartDashboard.putNumber("Right Front Goal Angle", modules[1].RPMGoal);
-    SmartDashboard.putNumber("Left Back Goal Angle", modules[2].RPMGoal);
-    SmartDashboard.putNumber("Right Back Goal Angle", modules[3].RPMGoal);
+    SmartDashboard.putNumber("Left Front Goal Angle", modules[0].angleGoal);
+    SmartDashboard.putNumber("Right Front Goal Angle", modules[1].angleGoal);
+    SmartDashboard.putNumber("Left Back Goal Angle", modules[2].angleGoal);
+    SmartDashboard.putNumber("Right Back Goal Angle", modules[3].angleGoal);
 
 
   }
@@ -141,15 +141,15 @@ public class SwerveDrivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Left Back Angle", modules[2].getAngle().getDegrees());
     SmartDashboard.putNumber("Right Back Angle", modules[3].getAngle().getDegrees());
 
-    SmartDashboard.putNumber("Left Front Goal RPMs", modules[0].feetPerSecondGoal);
-    SmartDashboard.putNumber("Right Front Goal RPMs", modules[1].feetPerSecondGoal);
-    SmartDashboard.putNumber("Left Back Goal RPMs", modules[2].feetPerSecondGoal);
-    SmartDashboard.putNumber("Right Back Goal RPMs", modules[3].feetPerSecondGoal);
+    SmartDashboard.putNumber("Left Front Goal RPMs", modules[0].RPMGoal);
+    SmartDashboard.putNumber("Right Front Goal RPMs", modules[1].RPMGoal);
+    SmartDashboard.putNumber("Left Back Goal RPMs", modules[2].RPMGoal);
+    SmartDashboard.putNumber("Right Back Goal RPMs", modules[3].RPMGoal);
 
-    SmartDashboard.putNumber("Left Front Goal Angle", modules[0].RPMGoal);
-    SmartDashboard.putNumber("Right Front Goal Angle", modules[1].RPMGoal);
-    SmartDashboard.putNumber("Left Back Goal Angle", modules[2].RPMGoal);
-    SmartDashboard.putNumber("Right Back Goal Angle", modules[3].RPMGoal);
+    SmartDashboard.putNumber("Left Front Goal Angle", modules[0].angleGoal);
+    SmartDashboard.putNumber("Right Front Goal Angle", modules[1].angleGoal);
+    SmartDashboard.putNumber("Left Back Goal Angle", modules[2].angleGoal);
+    SmartDashboard.putNumber("Right Back Goal Angle", modules[3].angleGoal);
 
   }
 }

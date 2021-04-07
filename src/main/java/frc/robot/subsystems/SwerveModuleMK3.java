@@ -36,7 +36,7 @@ public class SwerveModuleMK3 {
   private CANPIDController driveMotorPID;
   private CANPIDController angleMotorPID;
 
-  public double feetPerSecondGoal;
+  public double angleGoal;
   public double RPMGoal;
 
   public SwerveModuleMK3(CANSparkMax driveMotor, CANSparkMax angleMotor, CANCoder canCoder, Rotation2d offset) {
@@ -96,9 +96,10 @@ public class SwerveModuleMK3 {
     //double currentTicks = canCoder.getPosition() / canCoder.configGetFeedbackCoefficient();
     //double desiredTicks = currentTicks + deltaTicks;
 
-    angleMotorPID.setReference(state.angle.getDegrees()/360, ControlType.kPosition); //setReference wants rotations
+    angleGoal = state.angle.getDegrees()/360;
+    angleMotorPID.setReference(angleGoal, ControlType.kPosition); //setReference wants rotations
 
-    feetPerSecondGoal = Units.metersToFeet(state.speedMetersPerSecond);
+    double feetPerSecondGoal = Units.metersToFeet(state.speedMetersPerSecond);
     RPMGoal = (feetPerSecondGoal*60)/(Math.PI * RobotMap.WHEEL_DIAMETER); //convert feet per sec to RPM goal
     driveMotorPID.setReference(RPMGoal, ControlType.kVelocity); //wants RPM?
   }
