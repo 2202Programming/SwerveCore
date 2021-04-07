@@ -105,8 +105,8 @@ public class SwerveModuleMK3 {
 
     angleGoal = state.angle.getDegrees();
     //angleMotorPID.setReference(angleGoal/360, ControlType.kPosition); //setReference wants rotations
-    angleMotorOutput = MathUtil.clamp(anglePID.calculate(getAngle().getDegrees(),angleGoal),-0.5,0.5);
-    angleMotor.set(angleMotorOutput); //roborio PID for angle, clamping 0.5 max output
+    angleMotorOutput = MathUtil.clamp(anglePID.calculate(getAngle().getDegrees(),angleGoal),-RobotMap.MAX_ANGLE_MOTOR_OUTPUT,RobotMap.MAX_ANGLE_MOTOR_OUTPUT);
+    angleMotor.set(angleMotorOutput); //roborio PID for angle, clamping  max output
 
     double feetPerSecondGoal = Units.metersToFeet(state.speedMetersPerSecond);
     RPMGoal = (feetPerSecondGoal*60)/(Math.PI * RobotMap.WHEEL_DIAMETER); //convert feet per sec to RPM goal
