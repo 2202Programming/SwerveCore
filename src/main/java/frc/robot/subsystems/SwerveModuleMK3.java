@@ -35,7 +35,9 @@ public class SwerveModuleMK3 {
 
   private CANPIDController driveMotorPID;
   private CANPIDController angleMotorPID;
-  
+
+  public double feetPerSecondGoal;
+  public double RPMGoal;
 
   public SwerveModuleMK3(CANSparkMax driveMotor, CANSparkMax angleMotor, CANCoder canCoder, Rotation2d offset) {
     this.driveMotor = driveMotor;
@@ -73,6 +75,10 @@ public class SwerveModuleMK3 {
     return Rotation2d.fromDegrees(angleMotor.getEncoder().getPosition()/360.0); //built-in encoder returns rotations?  convert rotation to degrees
   }
 
+  public double getVelocity() {
+    return driveMotor.getEncoder().getVelocity();
+  }
+
   /**
    * Set the speed + rotation of the swerve module from a SwerveModuleState object
    * @param desiredState - A SwerveModuleState representing the desired new state of the module
@@ -82,17 +88,18 @@ public class SwerveModuleMK3 {
     SwerveModuleState state = SwerveModuleState.optimize(desiredState, currentRotation);
 
     // Find the difference between our current rotational position + our new rotational position
-    Rotation2d rotationDelta = state.angle.minus(currentRotation);
+    //Rotation2d rotationDelta = state.angle.minus(currentRotation);
 
     // Find the new absolute position of the module based on the difference in rotation
-    double deltaTicks = (rotationDelta.getDegrees() / 360) * kEncoderTicksPerRotation;
+    //double deltaTicks = (rotationDelta.getDegrees() / 360) * kEncoderTicksPerRotation;
     // Convert the CANCoder from it's position reading back to ticks
-    double currentTicks = canCoder.getPosition() / canCoder.configGetFeedbackCoefficient();
-    double desiredTicks = currentTicks + deltaTicks;
-    angleMotorPID.setReference(desiredTicks, ControlType.kPosition); //setReference wants rotations?
+    //double currentTicks = canCoder.getPosition() / canCoder.configGetFeedbackCoefficient();
+    //double desiredTicks = currentTicks + deltaTicks;
 
-    double feetPerSecond = Units.metersToFeet(state.speedMetersPerSecond);
-    double RPMGoal = (feetPerSecond*60)/(Math.PI * RobotMap.WHEEL_DIAMETER); //convert feet per sec to RPM goal
+    angleMotorPID.setReference(state.angle.getDegrees()/360, ControlType.kPosition); //setReference wants rotations
+
+    feetPerSecondGoal = Units.metersToFeet(state.speedMetersPerSecond);
+    RPMGoal = (feetPerSecondGoal*60)/(Math.PI * RobotMap.WHEEL_DIAMETER); //convert feet per sec to RPM goal
     driveMotorPID.setReference(RPMGoal, ControlType.kVelocity); //wants RPM?
   }
 

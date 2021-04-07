@@ -13,9 +13,13 @@ import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
+
+import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.wpilibj.SPI;
 
 public class SwerveDrivetrain extends SubsystemBase {
 
@@ -53,7 +57,7 @@ public class SwerveDrivetrain extends SubsystemBase {
     )
   );
 
-  private final AnalogGyro gyro = new AnalogGyro(0);
+  private final AHRS gyro = new AHRS(SPI.Port.kMXP);
 
   // TODO: Update module offsets to match your CANCoder offsets
   private SwerveModuleMK3[] modules = new SwerveModuleMK3[] {
@@ -100,10 +104,52 @@ public class SwerveDrivetrain extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    SmartDashboard.putNumber("Left Front RPMs", modules[0].getVelocity());
+    SmartDashboard.putNumber("Right Front RPMs", modules[1].getVelocity());
+    SmartDashboard.putNumber("Left Back RPMs", modules[2].getVelocity());
+    SmartDashboard.putNumber("Right Back RPMs", modules[3].getVelocity());
+
+    SmartDashboard.putNumber("Left Front Angle", modules[0].getAngle().getDegrees());
+    SmartDashboard.putNumber("Right Front Angle", modules[1].getAngle().getDegrees());
+    SmartDashboard.putNumber("Left Back Angle", modules[2].getAngle().getDegrees());
+    SmartDashboard.putNumber("Right Back Angle", modules[3].getAngle().getDegrees());
+
+    SmartDashboard.putNumber("Left Front Goal RPMs", modules[0].feetPerSecondGoal);
+    SmartDashboard.putNumber("Right Front Goal RPMs", modules[1].feetPerSecondGoal);
+    SmartDashboard.putNumber("Left Back Goal RPMs", modules[2].feetPerSecondGoal);
+    SmartDashboard.putNumber("Right Back Goal RPMs", modules[3].feetPerSecondGoal);
+
+    SmartDashboard.putNumber("Left Front Goal Angle", modules[0].RPMGoal);
+    SmartDashboard.putNumber("Right Front Goal Angle", modules[1].RPMGoal);
+    SmartDashboard.putNumber("Left Back Goal Angle", modules[2].RPMGoal);
+    SmartDashboard.putNumber("Right Back Goal Angle", modules[3].RPMGoal);
+
+
   }
 
   @Override
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
+
+    SmartDashboard.putNumber("Left Front RPMs", modules[0].getVelocity());
+    SmartDashboard.putNumber("Right Front RPMs", modules[1].getVelocity());
+    SmartDashboard.putNumber("Left Back RPMs", modules[2].getVelocity());
+    SmartDashboard.putNumber("Right Back RPMs", modules[3].getVelocity());
+
+    SmartDashboard.putNumber("Left Front Angle", modules[0].getAngle().getDegrees());
+    SmartDashboard.putNumber("Right Front Angle", modules[1].getAngle().getDegrees());
+    SmartDashboard.putNumber("Left Back Angle", modules[2].getAngle().getDegrees());
+    SmartDashboard.putNumber("Right Back Angle", modules[3].getAngle().getDegrees());
+
+    SmartDashboard.putNumber("Left Front Goal RPMs", modules[0].feetPerSecondGoal);
+    SmartDashboard.putNumber("Right Front Goal RPMs", modules[1].feetPerSecondGoal);
+    SmartDashboard.putNumber("Left Back Goal RPMs", modules[2].feetPerSecondGoal);
+    SmartDashboard.putNumber("Right Back Goal RPMs", modules[3].feetPerSecondGoal);
+
+    SmartDashboard.putNumber("Left Front Goal Angle", modules[0].RPMGoal);
+    SmartDashboard.putNumber("Right Front Goal Angle", modules[1].RPMGoal);
+    SmartDashboard.putNumber("Left Back Goal Angle", modules[2].RPMGoal);
+    SmartDashboard.putNumber("Right Back Goal Angle", modules[3].RPMGoal);
+
   }
 }
