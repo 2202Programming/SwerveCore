@@ -34,16 +34,24 @@ public class SwerveModuleMK3 {
   private CANSparkMax angleMotor;
   private CANCoder canCoder;
 
+  private CANPIDController driveMotorPID;
+  private CANPIDController angleMotorPID;
+  
+
   public SwerveModuleMK3(CANSparkMax driveMotor, CANSparkMax angleMotor, CANCoder canCoder, Rotation2d offset) {
     this.driveMotor = driveMotor;
     this.angleMotor = angleMotor;
     this.canCoder = canCoder;
 
+    driveMotorPID = driveMotor.getPIDController();
+    angleMotorPID = angleMotor.getPIDController();
+
     TalonFXConfiguration angleTalonFXConfiguration = new TalonFXConfiguration();
 
-    angleTalonFXConfiguration.slot0.kP = kAngleP;
-    angleTalonFXConfiguration.slot0.kI = kAngleI;
-    angleTalonFXConfiguration.slot0.kD = kAngleD;
+    angleMotorPID.setP(kAngleP);
+    angleMotorPID.setI(kAngleI);
+    angleMotorPID.setD(kAngleD);
+    angleMotorPID.setFeedbackDevice(canCoder);
 
     // Use the CANCoder as the remote sensor for the primary TalonFX PID
     angleTalonFXConfiguration.remoteFilter0.remoteSensorDeviceID = canCoder.getDeviceID();
@@ -53,10 +61,10 @@ public class SwerveModuleMK3 {
 
     TalonFXConfiguration driveTalonFXConfiguration = new TalonFXConfiguration();
 
-    driveTalonFXConfiguration.slot0.kP = kDriveP;
-    driveTalonFXConfiguration.slot0.kI = kDriveI;
-    driveTalonFXConfiguration.slot0.kD = kDriveD;
-    driveTalonFXConfiguration.slot0.kF = kDriveF;
+    driveMotorPID.setP(kDriveP);
+    driveMotorPID.setI(kDriveI);
+    driveMotorPID.setD(kDriveD);
+    driveMotorPID.setFF(kDriveF);
 
     driveMotor.configAllSettings(driveTalonFXConfiguration);
 
