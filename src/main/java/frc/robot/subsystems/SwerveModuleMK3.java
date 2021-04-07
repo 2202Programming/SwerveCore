@@ -96,8 +96,8 @@ public class SwerveModuleMK3 {
     //double currentTicks = canCoder.getPosition() / canCoder.configGetFeedbackCoefficient();
     //double desiredTicks = currentTicks + deltaTicks;
 
-    angleGoal = state.angle.getDegrees()/360;
-    angleMotorPID.setReference(angleGoal, ControlType.kPosition); //setReference wants rotations
+    angleGoal = state.angle.getDegrees();
+    angleMotorPID.setReference(angleGoal/360, ControlType.kPosition); //setReference wants rotations
 
     double feetPerSecondGoal = Units.metersToFeet(state.speedMetersPerSecond);
     RPMGoal = (feetPerSecondGoal*60)/(Math.PI * RobotMap.WHEEL_DIAMETER); //convert feet per sec to RPM goal
