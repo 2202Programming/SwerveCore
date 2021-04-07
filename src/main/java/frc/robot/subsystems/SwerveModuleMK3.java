@@ -1,13 +1,16 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.sensors.CANCoder;
+import com.ctre.phoenix.sensors.CANCoderConfiguration;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
 
+import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.util.Units;
+import edu.wpi.first.wpiutil.math.MathUtil;
 import frc.robot.RobotMap;
 
 
@@ -31,14 +34,19 @@ public class SwerveModuleMK3 {
   private CANSparkMax angleMotor;
 
   private CANPIDController driveMotorPID;
-  private CANPIDController angleMotorPID;
+  private CANPIDController angleMotorPID; //sparkmax PID can only use internal NEO encoders
+  private PIDController anglePID; //roborio PID so we can use CANCoders
+
+  private CANCoder canCoder;
 
   public double angleGoal;
   public double RPMGoal;
+  public double angleMotorOutput;
 
-  public SwerveModuleMK3(CANSparkMax driveMotor, CANSparkMax angleMotor, Rotation2d offset) {
+  public SwerveModuleMK3(CANSparkMax driveMotor, CANSparkMax angleMotor, Rotation2d offset, CANCoder canCoder) {
     this.driveMotor = driveMotor;
     this.angleMotor = angleMotor;
+    this.canCoder = canCoder;
 
     driveMotorPID = driveMotor.getPIDController();
     angleMotorPID = angleMotor.getPIDController();
@@ -48,11 +56,17 @@ public class SwerveModuleMK3 {
     angleMotorPID.setD(kAngleD);
     angleMotorPID.setFeedbackDevice(angleMotor.getEncoder());
 
+    anglePID = new PIDController(kAngleP, kAngleI, kAngleD);
+
     driveMotorPID.setP(kDriveP);
     driveMotorPID.setI(kDriveI);
     driveMotorPID.setD(kDriveD);
     driveMotorPID.setFF(kDriveF);
     driveMotorPID.setFeedbackDevice(driveMotor.getEncoder());
+
+    CANCoderConfiguration canCoderConfiguration = new CANCoderConfiguration();
+    canCoderConfiguration.magnetOffsetDegrees = offset.getDegrees();
+    canCoder.configAllSettings(canCoderConfiguration);
 
   }
 
@@ -64,8 +78,8 @@ public class SwerveModuleMK3 {
   public Rotation2d getAngle() {
     // Note: This assumes the CANCoders are setup with the default feedback coefficient
     // and the sesnor value reports degrees.
-    //return Rotation2d.fromDegrees(canCoder.getAbsolutePosition()); //for cancoder
-    return Rotation2d.fromDegrees(angleMotor.getEncoder().getPosition()/360.0); //built-in encoder returns rotations?  convert rotation to degrees
+    return Rotation2d.fromDegrees(canCoder.getAbsolutePosition()); //for cancoder
+    //return Rotation2d.fromDegrees(angleMotor.getEncoder().getPosition()/360.0); //built-in encoder returns rotations?  convert rotation to degrees
   }
 
   public double getVelocity() {
@@ -90,7 +104,9 @@ public class SwerveModuleMK3 {
     //double desiredTicks = currentTicks + deltaTicks;
 
     angleGoal = state.angle.getDegrees();
-    angleMotorPID.setReference(angleGoal/360, ControlType.kPosition); //setReference wants rotations
+    //angleMotorPID.setReference(angleGoal/360, ControlType.kPosition); //setReference wants rotations
+    angleMotorOutput = MathUtil.clamp(anglePID.calculate(getAngle().getDegrees(),angleGoal),-0.5,0.5);
+    angleMotor.set(angleMotorOutput); //roborio PID for angle, clamping 0.5 max output
 
     double feetPerSecondGoal = Units.metersToFeet(state.speedMetersPerSecond);
     RPMGoal = (feetPerSecondGoal*60)/(Math.PI * RobotMap.WHEEL_DIAMETER); //convert feet per sec to RPM goal

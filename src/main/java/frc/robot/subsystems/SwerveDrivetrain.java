@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
 
+import com.ctre.phoenix.sensors.CANCoder;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.SPI;
 
@@ -61,16 +62,16 @@ public class SwerveDrivetrain extends SubsystemBase {
   private SwerveModuleMK3[] modules = new SwerveModuleMK3[] {
     new SwerveModuleMK3(new CANSparkMax(RobotMap.DRIVETRAIN_FRONT_LEFT_DRIVE_MOTOR, 
       CANSparkMax.MotorType.kBrushless), new CANSparkMax(RobotMap.DRIVETRAIN_FRONT_LEFT_ANGLE_MOTOR, 
-      CANSparkMax.MotorType.kBrushless), Rotation2d.fromDegrees(0)), // Front Left
+      CANSparkMax.MotorType.kBrushless), Rotation2d.fromDegrees(0), new CANCoder(RobotMap.DRIVETRAIN_FRONT_LEFT_ENCODER)), // Front Left
     new SwerveModuleMK3(new CANSparkMax(RobotMap.DRIVETRAIN_FRONT_RIGHT_DRIVE_MOTOR, 
       CANSparkMax.MotorType.kBrushless), new CANSparkMax(RobotMap.DRIVETRAIN_FRONT_RIGHT_ANGLE_MOTOR, 
-      CANSparkMax.MotorType.kBrushless), Rotation2d.fromDegrees(0)), // Front Right
+      CANSparkMax.MotorType.kBrushless), Rotation2d.fromDegrees(0), new CANCoder(RobotMap.DRIVETRAIN_FRONT_RIGHT_ENCODER)), // Front Right
     new SwerveModuleMK3(new CANSparkMax(RobotMap.DRIVETRAIN_BACK_LEFT_DRIVE_MOTOR, 
       CANSparkMax.MotorType.kBrushless), new CANSparkMax(RobotMap.DRIVETRAIN_BACK_LEFT_ANGLE_MOTOR, 
-      CANSparkMax.MotorType.kBrushless), Rotation2d.fromDegrees(0)), // Back Left
+      CANSparkMax.MotorType.kBrushless), Rotation2d.fromDegrees(0), new CANCoder(RobotMap.DRIVETRAIN_BACK_LEFT_ENCODER)), // Back Left
     new SwerveModuleMK3(new CANSparkMax(RobotMap.DRIVETRAIN_BACK_RIGHT_DRIVE_MOTOR, 
       CANSparkMax.MotorType.kBrushless), new CANSparkMax(RobotMap.DRIVETRAIN_BACK_RIGHT_ANGLE_MOTOR, 
-      CANSparkMax.MotorType.kBrushless), Rotation2d.fromDegrees(0))  // Back Right
+      CANSparkMax.MotorType.kBrushless), Rotation2d.fromDegrees(0), new CANCoder(RobotMap.DRIVETRAIN_BACK_RIGHT_ENCODER))  // Back Right
   };
 
   public SwerveDrivetrain() {
@@ -121,6 +122,11 @@ public class SwerveDrivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Right Front Goal Angle", modules[1].angleGoal);
     SmartDashboard.putNumber("Left Back Goal Angle", modules[2].angleGoal);
     SmartDashboard.putNumber("Right Back Goal Angle", modules[3].angleGoal);
+
+    SmartDashboard.putNumber("Left Front AngleMotor Output", modules[0].angleMotorOutput);
+    SmartDashboard.putNumber("Right Front AngleMotor Output", modules[1].angleMotorOutput);
+    SmartDashboard.putNumber("Left Back AngleMotor Outpute", modules[2].angleMotorOutput);
+    SmartDashboard.putNumber("Right Back AngleMotor Output", modules[3].angleMotorOutput);
 
 
   }
