@@ -25,7 +25,8 @@ public class SwerveModuleMK3 {
   private static final double kAngleD = 0.0;
 
   // CANCoder has 4096 ticks/rotation (neo has 42 ticks per rotation)
-  private static double kEncoderTicksPerRotation = 4096;
+  //private static double kEncoderTicksPerRotation = 4096; //cancoder
+  private static double kEncoderTicksPerRotation = 42; //neo built-in
 
   private CANSparkMax driveMotor;
   private CANSparkMax angleMotor;
@@ -67,7 +68,8 @@ public class SwerveModuleMK3 {
   public Rotation2d getAngle() {
     // Note: This assumes the CANCoders are setup with the default feedback coefficient
     // and the sesnor value reports degrees.
-    return Rotation2d.fromDegrees(canCoder.getAbsolutePosition());
+    //return Rotation2d.fromDegrees(canCoder.getAbsolutePosition()); //for cancoder
+    return Rotation2d.fromDegrees(angleMotor.getEncoder().getPosition()/360.0); //built-in encoder returns rotations?  convert rotation to degrees
   }
 
   /**
@@ -75,7 +77,7 @@ public class SwerveModuleMK3 {
    * @param desiredState - A SwerveModuleState representing the desired new state of the module
    */
   public void setDesiredState(SwerveModuleState desiredState) {
-    Rotation2d currentRotation = getAngle();
+    Rotation2d currentRotation = getAngle(); //in degrees
     SwerveModuleState state = SwerveModuleState.optimize(desiredState, currentRotation);
 
     // Find the difference between our current rotational position + our new rotational position
@@ -86,7 +88,7 @@ public class SwerveModuleMK3 {
     // Convert the CANCoder from it's position reading back to ticks
     double currentTicks = canCoder.getPosition() / canCoder.configGetFeedbackCoefficient();
     double desiredTicks = currentTicks + deltaTicks;
-    angleMotorPID.setReference(desiredTicks, ControlType.kPosition);
+    angleMotorPID.setReference(desiredTicks, ControlType.kPosition); //setReference wants rotations?
   
     double feetPerSecond = Units.metersToFeet(state.speedMetersPerSecond);
     driveMotorPID.setReference(feetPerSecond / SwerveDrivetrain.kMaxSpeed, ControlType.kVelocity);
