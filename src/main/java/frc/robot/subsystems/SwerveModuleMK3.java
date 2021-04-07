@@ -1,8 +1,6 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.sensors.CANCoder;
-import com.ctre.phoenix.sensors.CANCoderConfiguration;
-import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
@@ -31,7 +29,6 @@ public class SwerveModuleMK3 {
 
   private CANSparkMax driveMotor;
   private CANSparkMax angleMotor;
-  private CANCoder canCoder;
 
   private CANPIDController driveMotorPID;
   private CANPIDController angleMotorPID;
@@ -39,10 +36,9 @@ public class SwerveModuleMK3 {
   public double angleGoal;
   public double RPMGoal;
 
-  public SwerveModuleMK3(CANSparkMax driveMotor, CANSparkMax angleMotor, CANCoder canCoder, Rotation2d offset) {
+  public SwerveModuleMK3(CANSparkMax driveMotor, CANSparkMax angleMotor, Rotation2d offset) {
     this.driveMotor = driveMotor;
     this.angleMotor = angleMotor;
-    this.canCoder = canCoder;
 
     driveMotorPID = driveMotor.getPIDController();
     angleMotorPID = angleMotor.getPIDController();
@@ -58,9 +54,6 @@ public class SwerveModuleMK3 {
     driveMotorPID.setFF(kDriveF);
     driveMotorPID.setFeedbackDevice(driveMotor.getEncoder());
 
-    CANCoderConfiguration canCoderConfiguration = new CANCoderConfiguration();
-    canCoderConfiguration.magnetOffsetDegrees = offset.getDegrees();
-    canCoder.configAllSettings(canCoderConfiguration);
   }
 
 
@@ -76,7 +69,7 @@ public class SwerveModuleMK3 {
   }
 
   public double getVelocity() {
-    return driveMotor.getEncoder().getVelocity();
+    return driveMotor.getEncoder().getVelocity(); //in RPM
   }
 
   /**
@@ -101,7 +94,7 @@ public class SwerveModuleMK3 {
 
     double feetPerSecondGoal = Units.metersToFeet(state.speedMetersPerSecond);
     RPMGoal = (feetPerSecondGoal*60)/(Math.PI * RobotMap.WHEEL_DIAMETER); //convert feet per sec to RPM goal
-    driveMotorPID.setReference(RPMGoal, ControlType.kVelocity); //wants RPM?
+    driveMotorPID.setReference(RPMGoal, ControlType.kVelocity); //wants RPM
   }
 
 }
