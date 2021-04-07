@@ -10,6 +10,7 @@ import com.revrobotics.ControlType;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.util.Units;
+import frc.robot.RobotMap;
 
 
 public class SwerveModuleMK3 {
@@ -89,9 +90,10 @@ public class SwerveModuleMK3 {
     double currentTicks = canCoder.getPosition() / canCoder.configGetFeedbackCoefficient();
     double desiredTicks = currentTicks + deltaTicks;
     angleMotorPID.setReference(desiredTicks, ControlType.kPosition); //setReference wants rotations?
-  
+
     double feetPerSecond = Units.metersToFeet(state.speedMetersPerSecond);
-    driveMotorPID.setReference(feetPerSecond / SwerveDrivetrain.kMaxSpeed, ControlType.kVelocity);
+    double RPMGoal = (feetPerSecond*60)/(Math.PI * RobotMap.WHEEL_DIAMETER); //convert feet per sec to RPM goal
+    driveMotorPID.setReference(RPMGoal, ControlType.kVelocity); //wants RPM?
   }
 
 }

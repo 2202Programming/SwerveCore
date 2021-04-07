@@ -29,4 +29,6 @@ public class RobotMap {
 
     public static final int PCM_CAN = 1;//CAN
     public static final int PDP_CAN = 0;//CAN
+
+    public static final double WHEEL_DIAMETER = 0.5; //in feet
 }
