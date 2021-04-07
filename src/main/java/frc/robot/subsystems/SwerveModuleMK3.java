@@ -1,19 +1,15 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.RemoteSensorSource;
-import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
-import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.CANCoderConfiguration;
+import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.util.Units;
-import frc.robot.util.misc.PIDFController;
+
 
 public class SwerveModuleMK3 {
 
@@ -46,27 +42,16 @@ public class SwerveModuleMK3 {
     driveMotorPID = driveMotor.getPIDController();
     angleMotorPID = angleMotor.getPIDController();
 
-    TalonFXConfiguration angleTalonFXConfiguration = new TalonFXConfiguration();
-
     angleMotorPID.setP(kAngleP);
     angleMotorPID.setI(kAngleI);
     angleMotorPID.setD(kAngleD);
-    angleMotorPID.setFeedbackDevice(canCoder);
-
-    // Use the CANCoder as the remote sensor for the primary TalonFX PID
-    angleTalonFXConfiguration.remoteFilter0.remoteSensorDeviceID = canCoder.getDeviceID();
-    angleTalonFXConfiguration.remoteFilter0.remoteSensorSource = RemoteSensorSource.CANCoder;
-    angleTalonFXConfiguration.primaryPID.selectedFeedbackSensor = FeedbackDevice.RemoteSensor0;
-    angleMotor.configAllSettings(angleTalonFXConfiguration);
-
-    TalonFXConfiguration driveTalonFXConfiguration = new TalonFXConfiguration();
+    angleMotorPID.setFeedbackDevice(angleMotor.getEncoder());
 
     driveMotorPID.setP(kDriveP);
     driveMotorPID.setI(kDriveI);
     driveMotorPID.setD(kDriveD);
     driveMotorPID.setFF(kDriveF);
-
-    driveMotor.configAllSettings(driveTalonFXConfiguration);
+    driveMotorPID.setFeedbackDevice(driveMotor.getEncoder());
 
     CANCoderConfiguration canCoderConfiguration = new CANCoderConfiguration();
     canCoderConfiguration.magnetOffsetDegrees = offset.getDegrees();
