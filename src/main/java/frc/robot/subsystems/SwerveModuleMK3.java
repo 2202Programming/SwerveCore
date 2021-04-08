@@ -42,6 +42,7 @@ public class SwerveModuleMK3 {
   public double angleGoal;
   public double RPMGoal;
   public double angleMotorOutput;
+  public double angleError;
 
   public SwerveModuleMK3(CANSparkMax driveMotor, CANSparkMax angleMotor, Rotation2d offset, CANCoder canCoder) {
     this.driveMotor = driveMotor;
@@ -102,8 +103,8 @@ public class SwerveModuleMK3 {
     // Convert the CANCoder from it's position reading back to ticks
     //double currentTicks = canCoder.getPosition() / canCoder.configGetFeedbackCoefficient();
     //double desiredTicks = currentTicks + deltaTicks;
-
     angleGoal = state.angle.getDegrees();
+    angleError = angleGoal - currentRotation.getDegrees();
     //angleMotorPID.setReference(angleGoal/360, ControlType.kPosition); //setReference wants rotations
     angleMotorOutput = MathUtil.clamp(anglePID.calculate(getAngle().getDegrees(),angleGoal),-RobotMap.MAX_ANGLE_MOTOR_OUTPUT,RobotMap.MAX_ANGLE_MOTOR_OUTPUT);
     angleMotor.set(angleMotorOutput); //roborio PID for angle, clamping  max output

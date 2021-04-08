@@ -48,7 +48,8 @@ public class SwerveDriveCommand extends CommandBase {
 
     boolean fieldRelative = controller.getBumper(GenericHID.Hand.kLeft);
 
-    drivetrain.drive(xSpeed, ySpeed, rot, fieldRelative);
+    //drivetrain.drive(xSpeed, ySpeed, rot, fieldRelative);
+    drivetrain.drive(0, 0, 0, fieldRelative); //for testing
   }
 
 }

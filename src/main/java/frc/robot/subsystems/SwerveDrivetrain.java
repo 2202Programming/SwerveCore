@@ -128,6 +128,10 @@ public class SwerveDrivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Left Back AngleMotor Outpute", modules[2].angleMotorOutput);
     SmartDashboard.putNumber("Right Back AngleMotor Output", modules[3].angleMotorOutput);
 
+    SmartDashboard.putNumber("Left Front AngleMotor Error", modules[0].angleError);
+    SmartDashboard.putNumber("Right Front AngleMotor Error", modules[1].angleError);
+    SmartDashboard.putNumber("Left Back AngleMotor Error", modules[2].angleError);
+    SmartDashboard.putNumber("Right Back AngleMotor Error", modules[3].angleError);
 
   }
 
