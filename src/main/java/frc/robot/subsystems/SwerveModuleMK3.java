@@ -21,9 +21,12 @@ public class SwerveModuleMK3 {
 
   // TODO: Tune these PID values for your robot
   private static final double kDriveP = 0.001;
-  private static final double kDriveI = 0.01;
-  private static final double kDriveD = 0.1;
-  private static final double kDriveF = 0.2;
+  //private static final double kDriveI = 0.01;
+  //private static final double kDriveD = 0.1;
+  //private static final double kDriveF = 0.2;
+  private static final double kDriveI = 0.0;
+  private static final double kDriveD = 0.0;
+  private static final double kDriveF = 0.0;
 
   private static final double kAngleP = 0.001;
   private static final double kAngleI = 0.0;
@@ -125,7 +128,7 @@ public class SwerveModuleMK3 {
     //double feetPerSecondGoal = Units.metersToFeet(desiredState.speedMetersPerSecond);
     double feetPerSecondGoal = RobotContainer.controller.getY(Hand.kLeft);
     RPMGoal = (feetPerSecondGoal*60)/(Math.PI * RobotMap.WHEEL_DIAMETER); //convert feet per sec to RPM goal
-    driveMotorPID.setReference(0, ControlType.kVelocity); //wants RPM
+    driveMotorPID.setReference(feetPerSecondGoal, ControlType.kVelocity); //wants RPM
   
 
 }
