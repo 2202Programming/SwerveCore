@@ -8,17 +8,16 @@ import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.RobotMap;
-
-import com.ctre.phoenix.sensors.CANCoder;
-import com.kauailabs.navx.frc.AHRS;
-import edu.wpi.first.wpilibj.SPI;
+import frc.robot.RobotContainer;
+import frc.robot.Constants.CAN;
+import frc.robot.subsystems.Sensors_Subsystem.EncoderID;
 
 public class SwerveDrivetrain extends SubsystemBase {
 
@@ -56,26 +55,38 @@ public class SwerveDrivetrain extends SubsystemBase {
     )
   );
 
-  private final AHRS gyro = new AHRS(SPI.Port.kMXP);
+  // sensors and our mk3 modules
+  private final Sensors_Subsystem sensors;
+  private final Gyro gyro;
+  private final SwerveModuleMK3[] modules; 
 
-  
-  private SwerveModuleMK3[] modules = new SwerveModuleMK3[] {
-    new SwerveModuleMK3(new CANSparkMax(RobotMap.DRIVETRAIN_FRONT_LEFT_DRIVE_MOTOR, 
-      CANSparkMax.MotorType.kBrushless), new CANSparkMax(RobotMap.DRIVETRAIN_FRONT_LEFT_ANGLE_MOTOR, 
-      CANSparkMax.MotorType.kBrushless), Rotation2d.fromDegrees(0), new CANCoder(RobotMap.DRIVETRAIN_FRONT_LEFT_ENCODER)), // Front Left
-    new SwerveModuleMK3(new CANSparkMax(RobotMap.DRIVETRAIN_FRONT_RIGHT_DRIVE_MOTOR, 
-      CANSparkMax.MotorType.kBrushless), new CANSparkMax(RobotMap.DRIVETRAIN_FRONT_RIGHT_ANGLE_MOTOR, 
-      CANSparkMax.MotorType.kBrushless), Rotation2d.fromDegrees(0), new CANCoder(RobotMap.DRIVETRAIN_FRONT_RIGHT_ENCODER)), // Front Right
-    new SwerveModuleMK3(new CANSparkMax(RobotMap.DRIVETRAIN_BACK_LEFT_DRIVE_MOTOR, 
-      CANSparkMax.MotorType.kBrushless), new CANSparkMax(RobotMap.DRIVETRAIN_BACK_LEFT_ANGLE_MOTOR, 
-      CANSparkMax.MotorType.kBrushless), Rotation2d.fromDegrees(0), new CANCoder(RobotMap.DRIVETRAIN_BACK_LEFT_ENCODER)), // Back Left
-    new SwerveModuleMK3(new CANSparkMax(RobotMap.DRIVETRAIN_BACK_RIGHT_DRIVE_MOTOR, 
-      CANSparkMax.MotorType.kBrushless), new CANSparkMax(RobotMap.DRIVETRAIN_BACK_RIGHT_ANGLE_MOTOR, 
-      CANSparkMax.MotorType.kBrushless), Rotation2d.fromDegrees(0), new CANCoder(RobotMap.DRIVETRAIN_BACK_RIGHT_ENCODER))  // Back Right
-  };
 
   public SwerveDrivetrain() {
-    gyro.reset(); 
+    sensors = RobotContainer.RC().sensors;
+    gyro = sensors;
+
+    var MT = CANSparkMax.MotorType.kBrushless;
+    modules = new SwerveModuleMK3[] {
+      // Front Left
+      new SwerveModuleMK3(new CANSparkMax(CAN.DT_FL_DRIVE, MT),  new CANSparkMax(CAN.DT_FL_ANGLE, MT), 
+                          Rotation2d.fromDegrees(0),  
+                          sensors.getCANCoder(EncoderID.FrontLeft) ),
+      // Front Right
+      new SwerveModuleMK3(new CANSparkMax(CAN.DT_FR_DRIVE, MT),  new CANSparkMax(CAN.DT_FR_ANGLE, MT), 
+                          Rotation2d.fromDegrees(0),  
+                          sensors.getCANCoder(EncoderID.FrontRight) ), 
+      // Back Left                    
+      new SwerveModuleMK3(new CANSparkMax(CAN.DT_BL_DRIVE, MT),  new CANSparkMax(CAN.DT_BL_ANGLE, MT), 
+                          Rotation2d.fromDegrees(0),  
+                          sensors.getCANCoder(EncoderID.BackLeft) ),
+      // Back Right
+      new SwerveModuleMK3(new CANSparkMax(CAN.DT_BR_DRIVE, MT),  new CANSparkMax(CAN.DT_BR_ANGLE, MT), 
+                          Rotation2d.fromDegrees(0),  
+                          sensors.getCANCoder(EncoderID.BackRight) ), 
+
+    };
+
+
   }
 
   /**

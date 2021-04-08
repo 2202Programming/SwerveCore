@@ -1,6 +1,7 @@
 package frc.robot;
 
 public class RobotMap {
+    /**
     //wheel 1
     public static final int DRIVETRAIN_FRONT_RIGHT_ENCODER = 7;//CAN
     public static final int DRIVETRAIN_FRONT_RIGHT_ANGLE_MOTOR = 27; // CAN
@@ -33,4 +34,8 @@ public class RobotMap {
     public static final double WHEEL_DIAMETER = 0.5; //in feet
 
     public static final double MAX_ANGLE_MOTOR_OUTPUT = 0.1;
+
+    deprecated in favor of our Constants conventions.
+
+    */
 }

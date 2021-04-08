@@ -4,9 +4,11 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.XboxController;
+import frc.robot.Constants.DriverPrefs;
 import frc.robot.commands.SwerveDriveCommand;
+import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
+import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -15,13 +17,21 @@ import frc.robot.subsystems.SwerveDrivetrain;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+  static RobotContainer  rc;
+  public static RobotContainer   RC() {return rc;}
 
-  public static final XboxController controller = new XboxController(0);
-
-  private final SwerveDrivetrain drivetrain = new SwerveDrivetrain();
+  public final HID_Xbox_Subsystem driverControls;
+  public final Sensors_Subsystem sensors;
+  private final SwerveDrivetrain drivetrain;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    drivetrain.setDefaultCommand(new SwerveDriveCommand(drivetrain, controller));
+    RobotContainer.rc = this;
+
+    sensors = new Sensors_Subsystem();
+    driverControls = new HID_Xbox_Subsystem(DriverPrefs.VelExpo, DriverPrefs.RotationExpo, DriverPrefs.StickDeadzone); 
+    drivetrain = new SwerveDrivetrain();
+
+    drivetrain.setDefaultCommand(new SwerveDriveCommand(drivetrain, driverControls));
   }
 }
