@@ -6,23 +6,26 @@ import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
 
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpiutil.math.MathUtil;
+import frc.robot.RobotContainer;
 import frc.robot.RobotMap;
 
 
 public class SwerveModuleMK3 {
 
   // TODO: Tune these PID values for your robot
-  private static final double kDriveP = 15.0;
+  private static final double kDriveP = 0.001;
   private static final double kDriveI = 0.01;
   private static final double kDriveD = 0.1;
   private static final double kDriveF = 0.2;
 
-  private static final double kAngleP = 1.0;
+  private static final double kAngleP = 0.001;
   private static final double kAngleI = 0.0;
   private static final double kAngleD = 0.0;
 
@@ -87,13 +90,21 @@ public class SwerveModuleMK3 {
     return driveMotor.getEncoder().getVelocity(); //in RPM
   }
 
+  public double angleFix(double angle) {
+    if (angle > 180){
+      return angle-360;
+    } else {
+    return angle;
+    }
+  }
+
   /**
    * Set the speed + rotation of the swerve module from a SwerveModuleState object
    * @param desiredState - A SwerveModuleState representing the desired new state of the module
    */
   public void setDesiredState(SwerveModuleState desiredState) {
     Rotation2d currentRotation = getAngle(); //in degrees
-    SwerveModuleState state = SwerveModuleState.optimize(desiredState, currentRotation);
+    //SwerveModuleState state = SwerveModuleState.optimize(desiredState, currentRotation);
 
     // Find the difference between our current rotational position + our new rotational position
     //Rotation2d rotationDelta = state.angle.minus(currentRotation);
@@ -103,15 +114,19 @@ public class SwerveModuleMK3 {
     // Convert the CANCoder from it's position reading back to ticks
     //double currentTicks = canCoder.getPosition() / canCoder.configGetFeedbackCoefficient();
     //double desiredTicks = currentTicks + deltaTicks;
-    angleGoal = state.angle.getDegrees();
-    angleError = angleGoal - currentRotation.getDegrees();
+    //angleGoal = state.angle.getDegrees();
+    
+    angleGoal = RobotContainer.controller.getX(Hand.kLeft)*180; //for testing
+    angleError = angleGoal - angleFix(currentRotation.getDegrees());
     //angleMotorPID.setReference(angleGoal/360, ControlType.kPosition); //setReference wants rotations
-    angleMotorOutput = MathUtil.clamp(anglePID.calculate(getAngle().getDegrees(),angleGoal),-RobotMap.MAX_ANGLE_MOTOR_OUTPUT,RobotMap.MAX_ANGLE_MOTOR_OUTPUT);
+    angleMotorOutput = MathUtil.clamp(anglePID.calculate(angleFix(currentRotation.getDegrees()),angleGoal),-RobotMap.MAX_ANGLE_MOTOR_OUTPUT,RobotMap.MAX_ANGLE_MOTOR_OUTPUT);
     angleMotor.set(angleMotorOutput); //roborio PID for angle, clamping  max output
 
-    double feetPerSecondGoal = Units.metersToFeet(state.speedMetersPerSecond);
+    //double feetPerSecondGoal = Units.metersToFeet(desiredState.speedMetersPerSecond);
+    double feetPerSecondGoal = RobotContainer.controller.getY(Hand.kLeft);
     RPMGoal = (feetPerSecondGoal*60)/(Math.PI * RobotMap.WHEEL_DIAMETER); //convert feet per sec to RPM goal
-    driveMotorPID.setReference(RPMGoal, ControlType.kVelocity); //wants RPM
-  }
+    driveMotorPID.setReference(0, ControlType.kVelocity); //wants RPM
+  
 
+}
 }

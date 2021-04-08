@@ -16,7 +16,7 @@ import frc.robot.subsystems.SwerveDrivetrain;
  */
 public class RobotContainer {
 
-  private final XboxController controller = new XboxController(0);
+  public static final XboxController controller = new XboxController(0);
 
   private final SwerveDrivetrain drivetrain = new SwerveDrivetrain();
 

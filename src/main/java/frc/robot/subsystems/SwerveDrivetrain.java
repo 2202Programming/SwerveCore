@@ -100,6 +100,14 @@ public class SwerveDrivetrain extends SubsystemBase {
     }
   }
 
+  public double angleFix(double angle) {
+    if (angle > 180){
+      return angle-360;
+    } else {
+    return angle;
+    }
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
@@ -108,10 +116,10 @@ public class SwerveDrivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Left Back RPMs", modules[2].getVelocity());
     SmartDashboard.putNumber("Right Back RPMs", modules[3].getVelocity());
 
-    SmartDashboard.putNumber("Left Front Angle", modules[0].getAngle().getDegrees());
-    SmartDashboard.putNumber("Right Front Angle", modules[1].getAngle().getDegrees());
-    SmartDashboard.putNumber("Left Back Angle", modules[2].getAngle().getDegrees());
-    SmartDashboard.putNumber("Right Back Angle", modules[3].getAngle().getDegrees());
+    SmartDashboard.putNumber("Left Front Angle", angleFix(modules[0].getAngle().getDegrees()));
+    SmartDashboard.putNumber("Right Front Angle", angleFix(modules[1].getAngle().getDegrees()));
+    SmartDashboard.putNumber("Left Back Angle", angleFix(modules[2].getAngle().getDegrees()));
+    SmartDashboard.putNumber("Right Back Angle", angleFix(modules[3].getAngle().getDegrees()));
 
     SmartDashboard.putNumber("Left Front Goal RPMs", modules[0].RPMGoal);
     SmartDashboard.putNumber("Right Front Goal RPMs", modules[1].RPMGoal);

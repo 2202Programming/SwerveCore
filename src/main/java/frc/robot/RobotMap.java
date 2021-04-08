@@ -32,5 +32,5 @@ public class RobotMap {
 
     public static final double WHEEL_DIAMETER = 0.5; //in feet
 
-    public static final double MAX_ANGLE_MOTOR_OUTPUT = 0.5;
+    public static final double MAX_ANGLE_MOTOR_OUTPUT = 0.1;
 }
