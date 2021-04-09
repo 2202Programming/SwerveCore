@@ -21,7 +21,6 @@ public class SwerveModuleMK3 {
   //mk3 gear ratios
   final double MAX_ANGLE_MOTOR_OUTPUT = 0.1;   // [0.0 to 1.0] 
   final double kSteeringGR = 12.8;             // [mo-turns to 1 angle wheel turn]
-  final double kSteeringCCGR = 1.0;            // [angle wheel turn to cancoder turn]
   final double kDriveGR = 8.16;                // [mo-turn to 1 drive wheel turn]
 
   final int kSlot = 0;    // using slot 0 for angle and drive pid on SmartMax
