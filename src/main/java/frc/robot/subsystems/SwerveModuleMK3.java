@@ -122,7 +122,7 @@ public class SwerveModuleMK3 {
   }
 
   public double getVelocity() {
-    return driveMotor.getEncoder().getVelocity(); // in RPM
+    return driveMotor.getEncoder().getVelocity(); // ft/s
   }
 
   //sets a -180 to 180 paradigm for angle
@@ -149,6 +149,7 @@ public class SwerveModuleMK3 {
 
     // use velocity control, internally scales for ft/s.
     double feetPerSecondGoal = Units.metersToFeet(state.speedMetersPerSecond);
+    feetPerSecondGoal = 0.0;
     driveMotorPID.setReference(feetPerSecondGoal, ControlType.kVelocity); 
   }
 
@@ -172,6 +173,7 @@ public class SwerveModuleMK3 {
 
     // set the velocity of the drive, scaled to use ft/s
     double feetPerSecondGoal = Units.metersToFeet(state.speedMetersPerSecond);
+    feetPerSecondGoal = 0.0;
     driveMotorPID.setReference(feetPerSecondGoal, ControlType.kVelocity);
   }
 

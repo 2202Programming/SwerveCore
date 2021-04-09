@@ -43,8 +43,6 @@ public class SwerveDriveCommand extends CommandBase {
     final var rot = rotLimiter.calculate(dc.getXYRotation()) * SwerveDrivetrain.kMaxAngularSpeed;
       //-rotLimiter.calculate(controller.getX(GenericHID.Hand.kRight))
       //  * SwerveDrivetrain.kMaxAngularSpeed;
-    xSpeed = 0.0;  //test
-    ySpeed = 0.0;
     boolean fieldRelative =  dc.useFieldRelative();
     drivetrain.drive(xSpeed, ySpeed, rot, fieldRelative); //for testing, bring up rot first
   }
