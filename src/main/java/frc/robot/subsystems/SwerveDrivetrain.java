@@ -64,7 +64,7 @@ public class SwerveDrivetrain extends SubsystemBase {
   public SwerveDrivetrain() {
     sensors = RobotContainer.RC().sensors;
     gyro = sensors;
-
+    //TODO: Need magnetic offsets for CANCoder 
     var MT = CANSparkMax.MotorType.kBrushless;
     modules = new SwerveModuleMK3[] {
       // Front Left

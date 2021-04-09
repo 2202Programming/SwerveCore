@@ -9,6 +9,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
+import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 //import com.kauailabs.navx.AHRSProtocol.AHRSUpdate;
 import com.kauailabs.navx.frc.AHRS;
 
@@ -27,8 +28,9 @@ import frc.robot.subsystems.util.MonitoredSubsystemBase;
 
 public class Sensors_Subsystem extends MonitoredSubsystemBase implements Gyro {
 
-  public enum YawSensor { kNavX, kADXRS450, kBlended};
-  
+  public enum YawSensor {
+    kNavX, kADXRS450, kBlended
+  };
 
   /**
    * Creates a new Sensors_Subsystem.
@@ -61,7 +63,6 @@ public class Sensors_Subsystem extends MonitoredSubsystemBase implements Gyro {
   private NetworkTableEntry nt_cancoder_br;
   private NetworkTableEntry nt_cancoder_fl;
   private NetworkTableEntry nt_cancoder_fr;
-  
 
   static final byte update_hz = 100;
   // Sensors
@@ -70,31 +71,33 @@ public class Sensors_Subsystem extends MonitoredSubsystemBase implements Gyro {
   ADXRS450_Gyro m_gyro450;
   Gyro m_gyro;
 
-  public static class RotationPositions{
+  public static class RotationPositions {
     public double back_left;
     public double back_right;
     public double front_left;
     public double front_right;
   }
 
-  public enum EncoderID {BackLeft, BackRight, FrontLeft, FrontRight}
+  public enum EncoderID {
+    BackLeft, BackRight, FrontLeft, FrontRight
+  }
 
-  //CANCoders - monitor dt angles
+  // CANCoders - monitor dt angles
   CANCoder rot_encoder_bl = init(new CANCoder(CAN.DT_BL_CANCODER));
   CANCoder rot_encoder_br = init(new CANCoder(CAN.DT_BR_CANCODER));
   CANCoder rot_encoder_fl = init(new CANCoder(CAN.DT_FL_CANCODER));
   CANCoder rot_encoder_fr = init(new CANCoder(CAN.DT_FR_CANCODER));
-  
+
   // CAN monitoring
   CANStatus m_canStatus;
-  
-  // Simulation
-  ///AHRS_GyroSim m_gyroSim;
 
-  //measured values
+  // Simulation
+  /// AHRS_GyroSim m_gyroSim;
+
+  // measured values
   double m_yaw_navx;
   double m_yaw_navx_d;
-  double m_yaw_xrs450; 
+  double m_yaw_xrs450;
   double m_yaw_xrs450_d;
   double m_yaw_blend;
   RotationPositions m_rot;
@@ -108,7 +111,7 @@ public class Sensors_Subsystem extends MonitoredSubsystemBase implements Gyro {
     m_canStatus = new CANStatus();
 
     // create devices and interface access, use interface where possible
-    m_gyro = m_gyro450 = new ADXRS450_Gyro(SPI.Port.kOnboardCS0); 
+    m_gyro = m_gyro450 = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
     m_gyro_ahrs = m_ahrs = new AHRS(SPI.Port.kMXP, update_hz);
     m_ahrs.enableLogging(true);
 
@@ -117,7 +120,7 @@ public class Sensors_Subsystem extends MonitoredSubsystemBase implements Gyro {
     nt_accelX = table.getEntry("x_dd");
     nt_accelY = table.getEntry("y_dd");
     nt_accelZ = table.getEntry("z_dd");
-    
+
     nt_yaw_navx = table.getEntry("yaw_navx");
     nt_yaw_navx_dot = table.getEntry("yaw_navx_d");
     nt_yaw_xrs450 = table.getEntry("yaw_xrs450");
@@ -127,7 +130,6 @@ public class Sensors_Subsystem extends MonitoredSubsystemBase implements Gyro {
     nt_canUtilization = table.getEntry("CanUtilization/value");
     nt_canRxError = table.getEntry("CanRxError");
     nt_canTxError = table.getEntry("CanTxError");
-
 
     // position angle encoders
     nt_cancoder_bl = table.getEntry("cc_bl");
@@ -139,20 +141,20 @@ public class Sensors_Subsystem extends MonitoredSubsystemBase implements Gyro {
     log();
   }
 
-  public void setSensorType(YawSensor type ) {
+  public void setSensorType(YawSensor type) {
     this.c_yaw_type = type;
   }
 
   @Override
   public void calibrate() {
-    if ( m_gyro450.isConnected()) {
+    if (m_gyro450.isConnected()) {
       m_gyro.calibrate();
     }
 
     if (m_ahrs.isConnected()) {
       m_ahrs.enableBoardlevelYawReset(true);
-     
-      m_ahrs.calibrate(); 
+
+      m_ahrs.calibrate();
       System.out.print("\ncalibrating AHRS ");
       while (m_ahrs.isCalibrating()) { // wait to zero yaw if calibration is still running
         Timer.delay(0.25);
@@ -165,8 +167,6 @@ public class Sensors_Subsystem extends MonitoredSubsystemBase implements Gyro {
     reset();
   }
 
-
-
   @Override
   public void monitored_periodic() {
     // This method will be called once per scheduler run
@@ -177,7 +177,7 @@ public class Sensors_Subsystem extends MonitoredSubsystemBase implements Gyro {
     m_yaw_xrs450_d = m_gyro450.getRate();
 
     // simple average, but could become weighted estimator.
-    m_yaw_blend = 0.5*(m_yaw_navx + m_yaw_xrs450);
+    m_yaw_blend = 0.5 * (m_yaw_navx + m_yaw_xrs450);
 
     m_rot = getRotationPositions();
 
@@ -185,13 +185,13 @@ public class Sensors_Subsystem extends MonitoredSubsystemBase implements Gyro {
   }
 
   void setupSimulation() {
-   // m_gyroSim_ahrs = new AHRS_GyroSim(m_ahrs);
-   // m_gyroSim SimDevice 
+    // m_gyroSim_ahrs = new AHRS_GyroSim(m_ahrs);
+    // m_gyroSim SimDevice
   }
 
   @Override
   public void simulationPeriodic() {
-    //m_gyroSim.setAngle(-m_drivetrainSimulator.getHeading().getDegrees());
+    // m_gyroSim.setAngle(-m_drivetrainSimulator.getHeading().getDegrees());
   }
 
   public void log() {
@@ -220,7 +220,7 @@ public class Sensors_Subsystem extends MonitoredSubsystemBase implements Gyro {
   }
 
   public void reset() {
-    if ( m_gyro450.isConnected()) {
+    if (m_gyro450.isConnected()) {
       m_gyro.reset();
     }
 
@@ -244,24 +244,26 @@ public class Sensors_Subsystem extends MonitoredSubsystemBase implements Gyro {
     }
   }
 
- @Override
+  @Override
   public void close() throws Exception {
     m_gyro.close();
     m_gyro_ahrs.close();
   }
 
-
-   /**
+  /**
    * Return the heading of the robot in degrees.
    *
-   * <p>The angle is continuous, that is it will continue from 360 to 361 degrees. This allows
-   * algorithms that wouldn't want to see a discontinuity in the gyro output as it sweeps past from
-   * 360 to 0 on the second time around.
+   * <p>
+   * The angle is continuous, that is it will continue from 360 to 361 degrees.
+   * This allows algorithms that wouldn't want to see a discontinuity in the gyro
+   * output as it sweeps past from 360 to 0 on the second time around.
    *
-   * <p>The angle is expected to increase as the gyro turns clockwise when looked at from the top.
-   * It needs to follow the NED axis convention.
+   * <p>
+   * The angle is expected to increase as the gyro turns clockwise when looked at
+   * from the top. It needs to follow the NED axis convention.
    *
-   * <p>This heading is based on integration of the returned rate from the gyro.
+   * <p>
+   * This heading is based on integration of the returned rate from the gyro.
    *
    * @return the current heading of the robot in degrees.
    */
@@ -270,14 +272,15 @@ public class Sensors_Subsystem extends MonitoredSubsystemBase implements Gyro {
     return getYaw();
   }
 
-
   /**
    * Return the rate of rotation of the gyro.
    *
-   * <p>The rate is based on the most recent reading of the gyro analog value
+   * <p>
+   * The rate is based on the most recent reading of the gyro analog value
    *
-   * <p>The rate is expected to be positive as the gyro turns clockwise when looked at from the top.
-   * It needs to follow the NED axis convention.
+   * <p>
+   * The rate is expected to be positive as the gyro turns clockwise when looked
+   * at from the top. It needs to follow the NED axis convention.
    *
    * @return the current rate in degrees per second
    */
@@ -292,13 +295,12 @@ public class Sensors_Subsystem extends MonitoredSubsystemBase implements Gyro {
 
       case kBlended:
       default:
-        return 0.5*( m_yaw_navx_d +  m_yaw_xrs450_d);
+        return 0.5 * (m_yaw_navx_d + m_yaw_xrs450_d);
     }
   }
 
-
   public RotationPositions getRotationPositions() {
-    var pos= new RotationPositions();
+    var pos = new RotationPositions();
 
     pos.back_left = rot_encoder_bl.getAbsolutePosition();
     pos.back_right = rot_encoder_br.getAbsolutePosition();
@@ -310,20 +312,18 @@ public class Sensors_Subsystem extends MonitoredSubsystemBase implements Gyro {
 
   public CANCoder getCANCoder(EncoderID id) {
     switch (id) {
-      case BackLeft: 
+      case BackLeft:
         return rot_encoder_bl;
-      case BackRight: 
+      case BackRight:
         return rot_encoder_br;
-      case FrontLeft: 
+      case FrontLeft:
         return rot_encoder_fl;
-      case FrontRight: 
+      case FrontRight:
         return rot_encoder_fr;
       default:
         return null;
     }
   }
-
-
 
   /**
    * init() - setup cancoder the way we need them.
@@ -332,9 +332,10 @@ public class Sensors_Subsystem extends MonitoredSubsystemBase implements Gyro {
    */
   
   CANCoder init(CANCoder c) {
-    c.configFactoryDefault();
+    c.configFactoryDefault();   // defaults to deg 
     c.setPositionToAbsolute();
-    c.configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360);
+	  c.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
+    c.configAbsoluteSensorRange(AbsoluteSensorRange.Signed_PlusMinus180);
     c.clearStickyFaults();
     return c;
   }

@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import frc.robot.util.misc.PIDFController;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -54,8 +55,6 @@ public final class Constants {
         public static final int DT_FR_DRIVE = 26; 
         public static final int DT_FR_ANGLE = 27;
 
-        
-        
 
     }
 
@@ -98,14 +97,6 @@ public final class Constants {
 
         //useful if we do modeling for tracking
         public static final double Mass = 145;  // lbs with battery and code loaded
-
-        //chassis  
-        public static final double WheelDiameter = 6.0; // inches, nominal
-        public static final double WheelAxleDistance = 2.22418; //(robot char 3/20/21)    //25.5/12.0; // feet 25.5 mid-wheel, 26.75 outer wheel
-
-        //wheel wear compensation - adjust when distance is off by small amount
-        public static final double WheelWearLeft = 0.99;   //[percent] of nominal
-        public static final double WheelWearRight = 0.99;  //[percent] of nominal
         
     }
 
@@ -131,7 +122,7 @@ public final class Constants {
     public static final class DriveTrain {
         // motor constraints
         public static final double motorMaxRPM = 5600;    // motor limit
-        public static final double wheelDiameter = 0.5; //[ft]
+        public static final double wheelDiameter = 0.5;   //[ft]
         /****
         // Other constraints
         public static final int smartCurrentMax = 60;  //amps in SparkMax, max setting
@@ -140,6 +131,11 @@ public final class Constants {
         // Acceleration limits
         public static final double slewRateMax = 2;      //sec limits adjusting slewrate 
         public static final boolean safetyEnabled = false; 
+
+        // SmartMax PID values [kp, ki, kd, kff] - these get sent to hardware controller
+        public static final PIDFController drivePIDF = new PIDFController(0.001, 0.0, 0.0, 0.0001);  
+        public static final PIDFController anglePIDF = new PIDFController(0.001, 0.0, 0.0, 0.0);  
+
     }
 
   

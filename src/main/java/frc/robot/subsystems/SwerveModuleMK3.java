@@ -1,10 +1,12 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.sensors.CANCoder;
+import com.ctre.phoenix.sensors.CANCoderConfiguration;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
+import com.revrobotics.CANSparkMax.IdleMode;
 
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
@@ -16,26 +18,22 @@ import frc.robot.Constants.DriveTrain;
 
 public class SwerveModuleMK3 {
 
-  // TODO: move to Constants at some point
-  final double MAX_ANGLE_MOTOR_OUTPUT = 0.1;   //[0.0 to 1.0] 
+  //mk3 gear ratios
+  final double MAX_ANGLE_MOTOR_OUTPUT = 0.1;   // [0.0 to 1.0] 
+  final double kSteeringGR = 12.8;             // [mo-turns to 1 angle wheel turn]
+  final double kSteeringCCGR = 1.0;            // [angle wheel turn to cancoder turn]
+  final double kDriveGR = 8.16;                // [mo-turn to 1 drive wheel turn]
 
-  // TODO: Tune these PID values for your robot
-  private static final double kDriveP = 0.001;
-  // private static final double kDriveI = 0.01;
-  // private static final double kDriveD = 0.1;
-  // private static final double kDriveF = 0.2;
-  private static final double kDriveI = 0.0;
-  private static final double kDriveD = 0.0;
-  private static final double kDriveF = 0.0;
+  final int kSlot = 0;    // using slot 0 for angle and drive pid on SmartMax
 
+  //Hardware PID settings in Constants.DriveTrain PIDFController
+
+  //Software PID - TBD
   private static final double kAngleP = 0.001;
   private static final double kAngleI = 0.0;
   private static final double kAngleD = 0.0;
 
-  // CANCoder has 4096 ticks/rotation (neo has 42 ticks per rotation)
-  // private static double kEncoderTicksPerRotation = 4096; //cancoder
-  private static double kEncoderTicksPerRotation = 42; // neo built-in
-
+  // devices
   private final CANSparkMax driveMotor;
   private final CANSparkMax angleMotor;
 
@@ -44,9 +42,12 @@ public class SwerveModuleMK3 {
   private final CANEncoder  angleEncoder;
   private final CANEncoder  driveEncoder;
 
-  private final PIDController anglePID; // roborio PID so we can use CANCoders
+  private final PIDController anglePID;         // roborio PID so we can use CANCoders -TBD
 
   private final CANCoder canCoder;
+
+  //for debugging
+  CANCoderConfiguration canCoderConfiguration;
 
   public double angleGoal;
   public double RPMGoal;
@@ -58,52 +59,48 @@ public class SwerveModuleMK3 {
     this.angleMotor = angleMotor;
     this.canCoder = canCoder;
 
+    driveMotor.setIdleMode(IdleMode.kBrake);
+    angleMotor.setIdleMode(IdleMode.kBrake);
+
     driveMotorPID = driveMotor.getPIDController();
     angleMotorPID = angleMotor.getPIDController();
     angleEncoder = angleMotor.getEncoder();
     driveEncoder = driveMotor.getEncoder();
 
-    // SparkMax Angle motor/encoder - position mode should be used
-    angleMotorPID.setP(kAngleP);
-    angleMotorPID.setI(kAngleI);
-    angleMotorPID.setD(kAngleD);
-    angleMotorPID.setFeedbackDevice(angleMotor.getEncoder());   // this tells Angle motor to use it's  internal Encoder
+    //set angle endcoder to return values in deg and deg/s
+    angleEncoder.setPositionConversionFactor(360.0/kSteeringGR);        // mo-rotations to degrees
+    angleEncoder.setVelocityConversionFactor(360.0/kSteeringGR/60.0);   // rpm to deg/s
+   
+    //set driveEncoder to use ft/s
+    driveEncoder.setPositionConversionFactor(Math.PI*DriveTrain.wheelDiameter/kDriveGR);      // mo-rotations to ft
+    driveEncoder.setPositionConversionFactor(Math.PI*DriveTrain.wheelDiameter/kDriveGR/60.0); // mo-rpm to ft/s
 
-
-    //TODO: set all the scale factors to use degrees or radians and (ft/ or m/s) on encoders
-
-    //pid around CANCoder angle to assist angleMotor interal PID
-    // DPL - maybe use this to close error after calibration?  not sure
+    // Pid around CANCoder angle to assist angleMotor interal PID - TBD
+    // DPL - maybe use this to close error after calibration?  
     anglePID = new PIDController(kAngleP, kAngleI, kAngleD);
-    anglePID.enableContinuousInput(0.0, 360.0);                // 0 and 360 should be same point
+    anglePID.enableContinuousInput(-180.0, 180.0);              // -180 == +180
 
-    // SparkMax Motor and encoder - velocity mode should be used
-    driveMotorPID.setP(kDriveP);
-    driveMotorPID.setI(kDriveI);
-    driveMotorPID.setD(kDriveD);
-    driveMotorPID.setFF(kDriveF);
-    driveMotorPID.setFeedbackDevice(driveMotor.getEncoder());
+    // SparkMax PID values
+    DriveTrain.anglePIDF.copyTo(angleMotorPID, kSlot);          // position mode 
+    DriveTrain.drivePIDF.copyTo(driveMotorPID, kSlot);          // velocity mode
 
-    /****
-     * 
-     * DPL  not sure of below code and how offset should be used.
-     * CANCoder have been setup in sensors, so we should be able to read 
-     * an absolute position and use that to calibrate the Neo positon.
-     * 
-    CANCoderConfiguration canCoderConfiguration = new CANCoderConfiguration();
-    canCoderConfiguration.magnetOffsetDegrees = offset.getDegrees();
-    canCoder.configAllSettings(canCoderConfiguration);
-    **/
-    calibrate();
+    calibrate(offset.getDegrees());
   }
 
-  void calibrate() {
-    Rotation2d pos = getAngle();
-    double pos_deg = pos.getDegrees();
-    angleEncoder.setPosition(pos_deg);     // sets internal angle to current measure absolute angle
+  void calibrate(double offsetDegrees) {
+
+    // adjust magnetic offset in CANCoder, measured constants.
+    canCoderConfiguration = new CANCoderConfiguration();
+    canCoder.getAllConfigs(canCoderConfiguration);             // read existing settings (debug)
+    canCoderConfiguration.magnetOffsetDegrees = offsetDegrees; // correct offset
+    canCoder.configMagnetOffset(offsetDegrees);                // update corrected offset
+    
+    // now read canCoder position
+    double pos_deg = canCoder.getAbsolutePosition();
+    // set to absolute starting angle of CANCoder
+    angleEncoder.setPosition(pos_deg);     
     anglePID.reset();
     anglePID.calculate(pos_deg, pos_deg);
-
   }
 
 
@@ -121,9 +118,8 @@ public class SwerveModuleMK3 {
   }
 
   public Rotation2d getAngleInternal() {
-    //TODO: check scaling, /360 looks wrong to me (DPL) - motor encoder returns rotations as unit, /360 converts to degrees (JCR)
-    // uses the motor's internal position (not absolute)
-    return Rotation2d.fromDegrees(angleMotor.getEncoder().getPosition()/360.0);
+    // uses the motor's internal position (not absolute, but calibrated at power up)
+    return Rotation2d.fromDegrees(angleMotor.getEncoder().getPosition());
   }
 
   public double getVelocity() {
@@ -149,13 +145,12 @@ public class SwerveModuleMK3 {
     Rotation2d currentRotation = getAngle(); 
     SwerveModuleState state = SwerveModuleState.optimize(desiredState, currentRotation);
 
-    // use position control on angle with INTERNAL encoder
-    // setReference wants rotations by default - TODO - check the scaling
-    angleMotorPID.setReference(state.angle.getDegrees()/360, ControlType.kPosition);
+    // use position control on angle with INTERNAL encoder, scaled internally for degrees
+    angleMotorPID.setReference(state.angle.getDegrees(), ControlType.kPosition);
 
+    // use velocity control, internally scales for ft/s.
     double feetPerSecondGoal = Units.metersToFeet(state.speedMetersPerSecond);
-    RPMGoal = (feetPerSecondGoal * 60) / (Math.PI *DriveTrain.wheelDiameter); // convert feet per sec to RPM goal
-    driveMotorPID.setReference(RPMGoal, ControlType.kVelocity); // wants RPM
+    driveMotorPID.setReference(feetPerSecondGoal, ControlType.kVelocity); 
   }
 
   /**
@@ -176,11 +171,9 @@ public class SwerveModuleMK3 {
     angleMotorOutput = MathUtil.clamp( angleCmd, -MAX_ANGLE_MOTOR_OUTPUT, MAX_ANGLE_MOTOR_OUTPUT);
     angleMotor.set(angleMotorOutput); // roborio PID for angle, clamping max output
 
-    // set the velocity of the drive
+    // set the velocity of the drive, scaled to use ft/s
     double feetPerSecondGoal = Units.metersToFeet(state.speedMetersPerSecond);
-    RPMGoal = (feetPerSecondGoal * 60) / (Math.PI * DriveTrain.wheelDiameter); // convert feet per sec to RPM goal
-    driveMotorPID.setReference(RPMGoal, ControlType.kVelocity); // wants RPM
-
+    driveMotorPID.setReference(feetPerSecondGoal, ControlType.kVelocity);
   }
 
 

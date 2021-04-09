@@ -25,14 +25,14 @@ public class SwerveDriveCommand extends CommandBase {
   public void execute() {
     // Get the x speed. We are inverting this because Xbox controllers return
     // negative values when we push forward.
-    final var xSpeed = xspeedLimiter.calculate(dc.getVelocityX()) * SwerveDrivetrain.kMaxSpeed;
+    var xSpeed = xspeedLimiter.calculate(dc.getVelocityX()) * SwerveDrivetrain.kMaxSpeed;
       //-xspeedLimiter.calculate(controller.getY(GenericHID.Hand.kLeft))
       //  * SwerveDrivetrain.kMaxSpeed;
 
     // Get the y speed or sideways/strafe speed. We are inverting this because
     // we want a positive value when we pull to the left. Xbox controllers
     // return positive values when you pull to the right by default.
-    final var ySpeed = yspeedLimiter.calculate(dc.getVelocityY()) * SwerveDrivetrain.kMaxSpeed;
+    var ySpeed = yspeedLimiter.calculate(dc.getVelocityY()) * SwerveDrivetrain.kMaxSpeed;
     //  -yspeedLimiter.calculate(controller.getX(GenericHID.Hand.kLeft))
     //    * SwerveDrivetrain.kMaxSpeed;
 
@@ -43,12 +43,10 @@ public class SwerveDriveCommand extends CommandBase {
     final var rot = rotLimiter.calculate(dc.getXYRotation()) * SwerveDrivetrain.kMaxAngularSpeed;
       //-rotLimiter.calculate(controller.getX(GenericHID.Hand.kRight))
       //  * SwerveDrivetrain.kMaxAngularSpeed;
-
+    xSpeed = 0.0;  //test
+    ySpeed = 0.0;
     boolean fieldRelative =  dc.useFieldRelative();
-      //controller.getBumper(GenericHID.Hand.kLeft);
-
-    //drivetrain.drive(xSpeed, ySpeed, rot, fieldRelative);
-    drivetrain.drive(0, 0, rot, fieldRelative); //for testing, bring up rot first
+    drivetrain.drive(xSpeed, ySpeed, rot, fieldRelative); //for testing, bring up rot first
   }
 
 }
