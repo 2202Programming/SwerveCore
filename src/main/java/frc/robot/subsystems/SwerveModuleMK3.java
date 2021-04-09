@@ -121,7 +121,7 @@ public class SwerveModuleMK3 {
   }
 
   public Rotation2d getAngleInternal() {
-    //TODO: check scaling, /360 looks wrong to me (DPL)
+    //TODO: check scaling, /360 looks wrong to me (DPL) - motor encoder returns rotations as unit, /360 converts to degrees (JCR)
     // uses the motor's internal position (not absolute)
     return Rotation2d.fromDegrees(angleMotor.getEncoder().getPosition()/360.0);
   }
@@ -130,7 +130,8 @@ public class SwerveModuleMK3 {
     return driveMotor.getEncoder().getVelocity(); // in RPM
   }
 
-  public double angleFix(double angle) {
+  //sets a -180 to 180 paradigm for angle
+  public double angleFix(double angle) { 
     if (angle > 180) {
       return angle - 360;
     } else {
@@ -154,7 +155,7 @@ public class SwerveModuleMK3 {
 
     double feetPerSecondGoal = Units.metersToFeet(state.speedMetersPerSecond);
     RPMGoal = (feetPerSecondGoal * 60) / (Math.PI *DriveTrain.wheelDiameter); // convert feet per sec to RPM goal
-    driveMotorPID.setReference(feetPerSecondGoal, ControlType.kVelocity); // wants RPM
+    driveMotorPID.setReference(RPMGoal, ControlType.kVelocity); // wants RPM
   }
 
   /**
@@ -178,7 +179,7 @@ public class SwerveModuleMK3 {
     // set the velocity of the drive
     double feetPerSecondGoal = Units.metersToFeet(state.speedMetersPerSecond);
     RPMGoal = (feetPerSecondGoal * 60) / (Math.PI * DriveTrain.wheelDiameter); // convert feet per sec to RPM goal
-    driveMotorPID.setReference(feetPerSecondGoal, ControlType.kVelocity); // wants RPM
+    driveMotorPID.setReference(RPMGoal, ControlType.kVelocity); // wants RPM
 
   }
 
