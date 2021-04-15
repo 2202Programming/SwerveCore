@@ -138,7 +138,7 @@ public class SwerveModuleMK3 {
 
   public void periodic() {
     //measure everything at same time
-    m_internalAngle = angleEncoder.getPosition();
+    m_internalAngle = angleEncoder.getPosition()*angleCmdInvert;
     m_externalAngle = absEncoder.getAbsolutePosition();
     m_velocity = driveEncoder.getVelocity();
 
