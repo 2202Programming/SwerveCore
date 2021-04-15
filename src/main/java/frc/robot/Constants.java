@@ -123,26 +123,39 @@ public final class Constants {
         // motor constraints
         public static final double motorMaxRPM = 5600;    // motor limit
         public static final double wheelDiameter = 0.5;   //[ft]
+
+        // Constraints on speeds enforeced in DriveTrain
+        public static final double kMaxSpeed = 10.0; // [ft/s]
+        public static final double kMaxAngularSpeed = Math.PI; // [rad/s] 1/2 rotation per second
+
         /****
+         * ### REMINDER - enable these once we have basics working
         // Other constraints
         public static final int smartCurrentMax = 60;  //amps in SparkMax, max setting
         public static final int smartCurrentLimit = 35; //amps in SparkMax, inital setting
         */
         // Acceleration limits
-        public static final double slewRateMax = 2;      //sec limits adjusting slewrate 
-        public static final boolean safetyEnabled = false; 
+        ///public static final double slewRateMax = 2;      //sec limits adjusting slewrate 
+        //public static final boolean safetyEnabled = false; 
 
         // SmartMax PID values [kp, ki, kd, kff] - these get sent to hardware controller
-        public static final PIDFController drivePIDF = new PIDFController(0.001, 0.0, 0.0, 0.0001);  
+        // DEBUG - SET FF first for drive, then add KP
+        public static final PIDFController drivePIDF = new PIDFController(0.0, 0.0, 0.0, 0.001);  
         public static final PIDFController anglePIDF = new PIDFController(0.01, 0.0, 0.0, 0.0); 
         
-        public static final double CAN_FL_OFFSET = -99.58;
-        public static final double CAN_BL_OFFSET = 90.351;
-        public static final double CAN_FR_OFFSET = -173.84;
-        public static final double CAN_BR_OFFSET = -27.24;
+        // CANCoder offsets for absolure calibration - stored in the magnet offset of the CC. [degrees]
+        public static final double CC_FL_OFFSET = -99.58;
+        public static final double CC_BL_OFFSET = 90.351;
+        public static final double CC_FR_OFFSET = -173.84;
+        public static final double CC_BR_OFFSET = -27.24;
 
-    }
+        // Kinematics model - wheel offsets from center of robot (0, 0)
+        // Left Front given below, symmetry used for others
+        public static final double XwheelOffset = 10;     
+        public static final double YwheelOffset = 10;
 
-  
-  
+        // Gear ratios
+        public static final double kSteeringGR = 12.8;   // [mo-turns to 1 angle wheel turn]
+        public static final double kDriveGR = 8.16;      // [mo-turn to 1 drive wheel turn]
+    }  
 }
