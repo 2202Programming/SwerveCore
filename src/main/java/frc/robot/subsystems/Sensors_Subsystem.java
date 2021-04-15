@@ -100,7 +100,7 @@ public class Sensors_Subsystem extends MonitoredSubsystemBase implements Gyro {
   double m_yaw_xrs450;
   double m_yaw_xrs450_d;
   double m_yaw_blend;
-  RotationPositions m_rot;
+  final RotationPositions m_rot = new RotationPositions();
 
   // configurion setting
   YawSensor c_yaw_type = YawSensor.kNavX;
@@ -179,7 +179,7 @@ public class Sensors_Subsystem extends MonitoredSubsystemBase implements Gyro {
     // simple average, but could become weighted estimator.
     m_yaw_blend = 0.5 * (m_yaw_navx + m_yaw_xrs450);
 
-    m_rot = getRotationPositions();
+    getRotationPositions(m_rot);
 
     log();
   }
@@ -212,6 +212,7 @@ public class Sensors_Subsystem extends MonitoredSubsystemBase implements Gyro {
     nt_canRxError.setNumber(m_canStatus.receiveErrorCount);
     nt_canTxError.setNumber(m_canStatus.transmitErrorCount);
 
+    getRotationPositions(m_rot);
     nt_cancoder_bl.setDouble(m_rot.back_left);
     nt_cancoder_br.setDouble(m_rot.back_right);
     nt_cancoder_fl.setDouble(m_rot.front_left);
@@ -299,8 +300,7 @@ public class Sensors_Subsystem extends MonitoredSubsystemBase implements Gyro {
     }
   }
 
-  public RotationPositions getRotationPositions() {
-    var pos = new RotationPositions();
+  public RotationPositions getRotationPositions(RotationPositions pos) {
 
     pos.back_left = rot_encoder_bl.getAbsolutePosition();
     pos.back_right = rot_encoder_br.getAbsolutePosition();

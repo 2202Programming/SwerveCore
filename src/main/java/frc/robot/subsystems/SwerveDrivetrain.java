@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.CAN;
+import frc.robot.Constants.DriveTrain;
 import frc.robot.subsystems.Sensors_Subsystem.EncoderID;
 
 public class SwerveDrivetrain extends SubsystemBase {
@@ -24,6 +25,15 @@ public class SwerveDrivetrain extends SubsystemBase {
   public static final double kMaxSpeed = Units.feetToMeters(13.6); // 13.6 feet per second
   public static final double kMaxAngularSpeed = Math.PI; // 1/2 rotation per second
 
+
+  /***
+   * 
+   * 4/14/21   RHS is spliting encoders,  RB_int =-48  RB_CC = +52  actual = 45 CCW(pos)
+   *                                      RF_int =-38  RF_CC = +49  actual = 45 CCW(pos)
+   * 
+   * TODD:  fix the rotation sign between CC and internal.
+   * 
+   */
   /**
    * TODO: These are example values and will need to be adjusted for your robot!
    * Modules are in the order of -
@@ -69,20 +79,20 @@ public class SwerveDrivetrain extends SubsystemBase {
     modules = new SwerveModuleMK3[] {
       // Front Left
       new SwerveModuleMK3(new CANSparkMax(CAN.DT_FL_DRIVE, MT),  new CANSparkMax(CAN.DT_FL_ANGLE, MT), 
-                          Rotation2d.fromDegrees(0),  
-                          sensors.getCANCoder(EncoderID.FrontLeft) ),
+                          Rotation2d.fromDegrees(DriveTrain.CAN_FL_OFFSET),  
+                          sensors.getCANCoder(EncoderID.FrontLeft), true, false ),
       // Front Right
       new SwerveModuleMK3(new CANSparkMax(CAN.DT_FR_DRIVE, MT),  new CANSparkMax(CAN.DT_FR_ANGLE, MT), 
-                          Rotation2d.fromDegrees(0),  
-                          sensors.getCANCoder(EncoderID.FrontRight) ), 
+                          Rotation2d.fromDegrees(DriveTrain.CAN_FR_OFFSET),  
+                          sensors.getCANCoder(EncoderID.FrontRight), true, false ), 
       // Back Left                    
       new SwerveModuleMK3(new CANSparkMax(CAN.DT_BL_DRIVE, MT),  new CANSparkMax(CAN.DT_BL_ANGLE, MT), 
-                          Rotation2d.fromDegrees(0),  
-                          sensors.getCANCoder(EncoderID.BackLeft) ),
+                          Rotation2d.fromDegrees(DriveTrain.CAN_BL_OFFSET),  
+                          sensors.getCANCoder(EncoderID.BackLeft), true, false ),
       // Back Right
       new SwerveModuleMK3(new CANSparkMax(CAN.DT_BR_DRIVE, MT),  new CANSparkMax(CAN.DT_BR_ANGLE, MT), 
-                          Rotation2d.fromDegrees(0),  
-                          sensors.getCANCoder(EncoderID.BackRight) ), 
+                          Rotation2d.fromDegrees(DriveTrain.CAN_BR_OFFSET),  
+                          sensors.getCANCoder(EncoderID.BackRight), true, false ), 
 
     };
 
@@ -121,6 +131,11 @@ public class SwerveDrivetrain extends SubsystemBase {
 
   @Override
   public void periodic() {
+    //update internal angle
+    for (int i = 0; i < 4; i++) {
+      SwerveModuleMK3 module = modules[i];
+      module.periodic();
+    }
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("Left Front RPMs", modules[0].getVelocity());
     SmartDashboard.putNumber("Right Front RPMs", modules[1].getVelocity());
@@ -151,6 +166,12 @@ public class SwerveDrivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Right Front AngleMotor Error", modules[1].angleError);
     SmartDashboard.putNumber("Left Back AngleMotor Error", modules[2].angleError);
     SmartDashboard.putNumber("Right Back AngleMotor Error", modules[3].angleError);
+
+    SmartDashboard.putNumber("Left Front Internal Angle", modules[0].internalAngle);
+    SmartDashboard.putNumber("Right Front Internal Angle", modules[1].internalAngle);
+    SmartDashboard.putNumber("Left Back Internal Angle", modules[2].internalAngle);
+    SmartDashboard.putNumber("Right Back Internal Angle", modules[3].internalAngle);
+
 
   }
 

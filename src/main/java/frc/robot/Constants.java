@@ -134,7 +134,12 @@ public final class Constants {
 
         // SmartMax PID values [kp, ki, kd, kff] - these get sent to hardware controller
         public static final PIDFController drivePIDF = new PIDFController(0.001, 0.0, 0.0, 0.0001);  
-        public static final PIDFController anglePIDF = new PIDFController(0.001, 0.0, 0.0, 0.0);  
+        public static final PIDFController anglePIDF = new PIDFController(0.01, 0.0, 0.0, 0.0); 
+        
+        public static final double CAN_FL_OFFSET = -99.58;
+        public static final double CAN_BL_OFFSET = 90.351;
+        public static final double CAN_FR_OFFSET = -173.84;
+        public static final double CAN_BR_OFFSET = -27.24;
 
     }
 

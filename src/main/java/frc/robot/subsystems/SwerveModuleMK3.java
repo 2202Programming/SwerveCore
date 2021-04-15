@@ -52,11 +52,15 @@ public class SwerveModuleMK3 {
   public double RPMGoal;
   public double angleMotorOutput;
   public double angleError;
+  public double internalAngle;
 
-  public SwerveModuleMK3(CANSparkMax driveMotor, CANSparkMax angleMotor, Rotation2d offset, CANCoder canCoder) {
+  public SwerveModuleMK3(CANSparkMax driveMotor, CANSparkMax angleMotor, Rotation2d offset, CANCoder canCoder, boolean invertAngle, boolean invertDrive) {
     this.driveMotor = driveMotor;
     this.angleMotor = angleMotor;
     this.canCoder = canCoder;
+
+    angleMotor.setInverted(invertAngle);
+    driveMotor.setInverted(invertDrive);
 
     driveMotor.setIdleMode(IdleMode.kBrake);
     angleMotor.setIdleMode(IdleMode.kBrake);
@@ -98,10 +102,14 @@ public class SwerveModuleMK3 {
     double pos_deg = canCoder.getAbsolutePosition();
     // set to absolute starting angle of CANCoder
     angleEncoder.setPosition(pos_deg);     
+    var angle = angleEncoder.getPosition();
     anglePID.reset();
     anglePID.calculate(pos_deg, pos_deg);
   }
 
+  public void periodic() {
+    internalAngle = angleEncoder.getPosition();
+  }
 
   /**
    * Gets the relative rotational position of the module
@@ -142,8 +150,8 @@ public class SwerveModuleMK3 {
    */
   public void setDesiredState(SwerveModuleState desiredState) {
     Rotation2d currentRotation = getAngle(); 
-    SwerveModuleState state = SwerveModuleState.optimize(desiredState, currentRotation);
-
+    SwerveModuleState state = desiredState;//SwerveModuleState.optimize(desiredState, currentRotation);
+    internalAngle = angleEncoder.getPosition();
     // use position control on angle with INTERNAL encoder, scaled internally for degrees
     angleMotorPID.setReference(state.angle.getDegrees(), ControlType.kPosition);
 

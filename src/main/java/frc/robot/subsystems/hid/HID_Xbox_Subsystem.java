@@ -102,8 +102,8 @@ public class HID_Xbox_Subsystem extends MonitoredSubsystemBase implements Driver
 
     // XYRot or Swerve Drive
     // Rotation on Left-X axis,  X-Y throttle on Right
-    velXShaper = new ExpoShaper(velExpo,  () -> driver.getX(Hand.kRight));   
-    velYShaper = new ExpoShaper(velExpo,  () -> driver.getY(Hand.kRight));
+    velXShaper = new ExpoShaper(velExpo,  () -> driver.getY(Hand.kRight));   
+    velYShaper = new ExpoShaper(velExpo,  () -> driver.getX(Hand.kRight));
     swRotShaper = new ExpoShaper(rotExpo, () -> driver.getX(Hand.kLeft));  
 
     // add some deadzone in normalized coordinates
