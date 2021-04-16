@@ -122,7 +122,7 @@ public final class Constants {
     public static final class DriveTrain {
         // motor constraints
         public static final double motorMaxRPM = 5600;    // motor limit
-        public static final double wheelDiameter = 0.5;   //[ft]
+        public static final double wheelDiameter = 0.3333333;   //[ft]  4" wheels
 
         // Constraints on speeds enforeced in DriveTrain
         public static final double kMaxSpeed = 10.0; // [ft/s]
