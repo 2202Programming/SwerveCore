@@ -221,8 +221,7 @@ public class SwerveModuleMK3 {
    *                     of the module
    */
   public void setDesiredState(SwerveModuleState desiredState) {
-    SwerveModuleState state = desiredState;
-    SwerveModuleState.optimize(desiredState, Rotation2d.fromDegrees(m_internalAngle));
+    SwerveModuleState state = SwerveModuleState.optimize(desiredState, Rotation2d.fromDegrees(m_internalAngle));
 
     // use position control on angle with INTERNAL encoder, scaled internally for degrees
     angle_target = angleCmdInvert * state.angle.getDegrees();
