@@ -66,6 +66,9 @@ public class SwerveModuleMK3 {
   public double m_externalAngle;
   public double m_velocity;
 
+  private double angle_target;
+  private double feetPerSecondGoal;
+
   public SwerveModuleMK3(CANSparkMax driveMtr, CANSparkMax angleMtr, double offsetDegrees, CANCoder absEnc,
       boolean invertAngleMtr, boolean invertAngleCmd, boolean invertDrive) {
     driveMotor = driveMtr;
@@ -215,10 +218,11 @@ public class SwerveModuleMK3 {
     SwerveModuleState state = desiredState;//SwerveModuleState.optimize(desiredState, currentRotation);
 
     // use position control on angle with INTERNAL encoder, scaled internally for degrees
-    angleMotorPID.setReference(angleCmdInvert * state.angle.getDegrees(), ControlType.kPosition);
+    angle_target = angleCmdInvert * state.angle.getDegrees();
+    angleMotorPID.setReference(angle_target, ControlType.kPosition);
 
     // use velocity control, internally scales for ft/s.
-    double feetPerSecondGoal = Units.metersToFeet(state.speedMetersPerSecond);
+    feetPerSecondGoal = Units.metersToFeet(state.speedMetersPerSecond);
     feetPerSecondGoal = 0.0;
     driveMotorPID.setReference(feetPerSecondGoal, ControlType.kVelocity); 
   }
@@ -259,6 +263,8 @@ public class SwerveModuleMK3 {
   private NetworkTableEntry nte_angle;
   private NetworkTableEntry nte_external_angle;
   private NetworkTableEntry nte_velocity;
+  private NetworkTableEntry nte_angle_target;
+  private NetworkTableEntry nte_feetPerSecondGoal;
 
   void NTConfig() {
     // direct networktables logging
@@ -266,6 +272,10 @@ public class SwerveModuleMK3 {
     nte_angle = table.getEntry(NTPrefix + "/angle");
     nte_external_angle = table.getEntry(NTPrefix +"/angle_ext");
     nte_velocity = table.getEntry(NTPrefix + "/velocity");
+    nte_angle_target = table.getEntry(NTPrefix + "/angle_target");
+    nte_feetPerSecondGoal = table.getEntry(NTPrefix + "/FPS_target");
+    
+
   }
 
   void NTUpdate() {
@@ -273,6 +283,8 @@ public class SwerveModuleMK3 {
     nte_angle.setDouble(m_internalAngle);
     nte_external_angle.setDouble(m_externalAngle);
     nte_velocity.setDouble(m_velocity);
+    nte_angle_target.setDouble(angle_target);
+    nte_feetPerSecondGoal.setDouble(feetPerSecondGoal);
   }
 
 }
