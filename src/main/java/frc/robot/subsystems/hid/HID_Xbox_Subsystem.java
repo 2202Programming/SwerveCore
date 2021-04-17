@@ -10,6 +10,7 @@ package frc.robot.subsystems.hid;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.subsystems.ifx.DriverControls;
 import frc.robot.subsystems.util.MonitoredSubsystemBase;
 
@@ -41,6 +42,41 @@ import frc.robot.subsystems.util.MonitoredSubsystemBase;
  * 
  */
 public class HID_Xbox_Subsystem extends MonitoredSubsystemBase implements DriverControls {
+
+  static class ActionOnEdge {
+    boolean prev;
+    boolean toggle;
+    final JoystickButton button;
+    final String name;
+
+    public ActionOnEdge(String name, JoystickButton b) {
+      this.name = name;
+      toggle = false;
+      button = b;
+      read();
+    }
+    
+    private boolean read() {
+      prev = button.get();
+      return prev;
+    }
+
+    boolean risingEdge() {
+      if (prev == true) {
+          read();
+          return false;
+        }
+      else if (read()) {
+        toggle = !toggle;
+        return true;
+      }
+      return false;
+    }
+    boolean get() {return toggle;}
+  }
+
+
+
   /**
    * Creates a new HID_Subsystem.
    */
@@ -48,6 +84,8 @@ public class HID_Xbox_Subsystem extends MonitoredSubsystemBase implements Driver
   private final XboxController assistant;
   private final SideboardController switchBoard;
   // private final XboxController phantom = new XboxController(3);
+  private final JoystickButton fieldRelativeButton;
+  ActionOnEdge fieldRel;
 
   // Buttons onStartup - in case you want to do something based on controls
   // being held at power up or on switchboard.
@@ -86,6 +124,8 @@ public class HID_Xbox_Subsystem extends MonitoredSubsystemBase implements Driver
     assistant = (XboxController) registerController(Id.Assistant, new XboxController(Id.Assistant.value));
     switchBoard = (SideboardController) registerController(Id.SwitchBoard, new SideboardController(Id.SwitchBoard.value));
 
+   
+
     /**
      * All Joysticks are read and shaped without sign conventions.
      * Sign convention added on periodic based on the type of driver control
@@ -105,6 +145,8 @@ public class HID_Xbox_Subsystem extends MonitoredSubsystemBase implements Driver
     velXShaper = new ExpoShaper(velExpo,  () -> driver.getY(Hand.kRight)); // X robot is Y axis on Joystick
     velYShaper = new ExpoShaper(velExpo,  () -> driver.getX(Hand.kRight)); // Y robot is X axis on Joystick
     swRotShaper = new ExpoShaper(rotExpo, () -> driver.getX(Hand.kLeft));  
+    fieldRelativeButton = bindButton(Id.Driver, XboxButton.LB.value); 
+    fieldRel = new ActionOnEdge("field-relative", fieldRelativeButton);
 
     // add some deadzone in normalized coordinates
     rotShaper.setDeadzone(deadzone);
@@ -153,6 +195,8 @@ public class HID_Xbox_Subsystem extends MonitoredSubsystemBase implements Driver
     velX = -velXShaper.get();    //invert, so right stick moves robot, right, lowering Y 
     velY = -velYShaper.get();    //invert, so forward stick is positive, increase X
     xyRot = -swRotShaper.get();  //invert, so positive is CCW 
+
+    fieldRel.risingEdge();
   }
   
   public void setLimitRotation(boolean enableLimit) {
@@ -250,6 +294,10 @@ public class HID_Xbox_Subsystem extends MonitoredSubsystemBase implements Driver
     default:
       return 0;
     }
+  }
+  @Override
+  public boolean useFieldRelative() {
+    return fieldRel.get();
   }
 
   public void log() {

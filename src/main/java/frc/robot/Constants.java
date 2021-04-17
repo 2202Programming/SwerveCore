@@ -125,8 +125,8 @@ public final class Constants {
         public static final double wheelDiameter = 0.3333333;   //[ft]  4" wheels
 
         // Constraints on speeds enforeced in DriveTrain
-        public static final double kMaxSpeed = 3.0; // [ft/s]
-        public static final double kMaxAngularSpeed = 0.5*Math.PI; // [rad/s] 1/2 rotation per second
+        public static final double kMaxSpeed = 4.0; // [ft/s]
+        public static final double kMaxAngularSpeed = Math.PI; // [rad/s] 1/2 rotation per second
 
         /****
          * ### REMINDER - enable these once we have basics working
@@ -140,7 +140,7 @@ public final class Constants {
 
         // SmartMax PID values [kp, ki, kd, kff] - these get sent to hardware controller
         // DEBUG - SET FF first for drive, then add KP
-        public static final PIDFController drivePIDF = new PIDFController(0.0, 0.0, 0.0, 0.1);  
+        public static final PIDFController drivePIDF = new PIDFController(0.09, 0.0, 0.0, 0.08076);  
         public static final PIDFController anglePIDF = new PIDFController(0.01, 0.0, 0.0, 0.0); 
         
         // CANCoder offsets for absolure calibration - stored in the magnet offset of the CC. [degrees]
