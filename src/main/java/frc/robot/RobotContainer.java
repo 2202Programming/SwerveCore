@@ -7,9 +7,12 @@ package frc.robot;
 import frc.robot.Constants.DriverPrefs;
 import frc.robot.commands.SwerveDriveCommand;
 import frc.robot.commands.test.MK3_AngleSpeed;
+import frc.robot.commands.test.SwerveDriveTest;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
+import frc.robot.subsystems.hid.XboxPOV;
+import frc.robot.subsystems.ifx.DriverControls.Id;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -37,6 +40,12 @@ public class RobotContainer {
     // testing 
     var cmd = new MK3_AngleSpeed(driverControls, drivetrain, 1);  // FL, FR, BL, BR (0..3)
     drivetrain.setDefaultCommand(cmd);
+
+    //testing commands, speed in meters per sec, angle in degrees
+    driverControls.bind(Id.Driver, XboxPOV.POV_UP).whenHeld(new SwerveDriveTest(drivetrain, 0, 0));
+    driverControls.bind(Id.Driver, XboxPOV.POV_RIGHT).whenHeld(new SwerveDriveTest(drivetrain, 0, 90));
+    driverControls.bind(Id.Driver, XboxPOV.POV_DOWN).whenHeld(new SwerveDriveTest(drivetrain, 0, 180));
+    driverControls.bind(Id.Driver, XboxPOV.POV_LEFT).whenHeld(new SwerveDriveTest(drivetrain, 0, -90));
 
   }
 }

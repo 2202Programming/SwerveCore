@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
 
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
@@ -131,6 +132,14 @@ public class SwerveDrivetrain extends SubsystemBase {
     // output the angle and velocity for each module
     for (int i = 0; i < states.length; i++) {
       modules[i].setDesiredState(states[i]);
+    }
+  }
+
+
+  public void testDrive(double speed, double angle) { 
+    // output the angle and speed (meters per sec)  for each module
+    for (int i = 0; i < 4; i++) {
+      modules[i].setDesiredState(new SwerveModuleState(speed, new Rotation2d(Math.toRadians(angle))));
     }
   }
 
