@@ -60,22 +60,10 @@ public class SwerveDrivetrain extends SubsystemBase {
    * https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/swerve-drive-kinematics.html#constructing-the-kinematics-object
    */
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
-    new Translation2d(
-      Units.inchesToMeters(DriveTrain.XwheelOffset),   // Front Left
-      Units.inchesToMeters(DriveTrain.YwheelOffset)
-    ),
-    new Translation2d(
-      Units.inchesToMeters(DriveTrain.XwheelOffset),   // Front Right
-      Units.inchesToMeters(-DriveTrain.YwheelOffset)
-    ),
-    new Translation2d(
-      Units.inchesToMeters(-DriveTrain.XwheelOffset),  // Back Left
-      Units.inchesToMeters(DriveTrain.YwheelOffset)
-    ),
-    new Translation2d(
-      Units.inchesToMeters(-DriveTrain.XwheelOffset),  // Back Right
-      Units.inchesToMeters(-DriveTrain.YwheelOffset)
-    )
+    new Translation2d(DriveTrain.XwheelOffset, DriveTrain.YwheelOffset),  // Front Left
+    new Translation2d(DriveTrain.XwheelOffset, -DriveTrain.YwheelOffset),   // Front Right
+    new Translation2d(-DriveTrain.XwheelOffset, DriveTrain.YwheelOffset),  // Back Left
+    new Translation2d(-DriveTrain.XwheelOffset, -DriveTrain.YwheelOffset)  // Back Right
   );
 
   // sensors and our mk3 modules

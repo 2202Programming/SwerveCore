@@ -125,8 +125,8 @@ public final class Constants {
         public static final double wheelDiameter = 0.3333333;   //[ft]  4" wheels
 
         // Constraints on speeds enforeced in DriveTrain
-        public static final double kMaxSpeed = 10.0; // [ft/s]
-        public static final double kMaxAngularSpeed = Math.PI; // [rad/s] 1/2 rotation per second
+        public static final double kMaxSpeed = 3.0; // [ft/s]
+        public static final double kMaxAngularSpeed = 0.5*Math.PI; // [rad/s] 1/2 rotation per second
 
         /****
          * ### REMINDER - enable these once we have basics working
@@ -140,7 +140,7 @@ public final class Constants {
 
         // SmartMax PID values [kp, ki, kd, kff] - these get sent to hardware controller
         // DEBUG - SET FF first for drive, then add KP
-        public static final PIDFController drivePIDF = new PIDFController(0.0, 0.0, 0.0, 0.001);  
+        public static final PIDFController drivePIDF = new PIDFController(0.0, 0.0, 0.0, 0.1);  
         public static final PIDFController anglePIDF = new PIDFController(0.01, 0.0, 0.0, 0.0); 
         
         // CANCoder offsets for absolure calibration - stored in the magnet offset of the CC. [degrees]
@@ -161,9 +161,9 @@ public final class Constants {
 
 
         // Kinematics model - wheel offsets from center of robot (0, 0)
-        // Left Front given below, symmetry used for others
-        public static final double XwheelOffset = 10;     
-        public static final double YwheelOffset = 10;
+        // Left Front given below, symmetry used for others (in feet)
+        public static final double XwheelOffset = 10.5/12;     
+        public static final double YwheelOffset = 10.5/12;
 
         // Gear ratios
         public static final double kSteeringGR = 12.8;   // [mo-turns to 1 angle wheel turn]

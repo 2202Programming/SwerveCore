@@ -38,14 +38,14 @@ public class RobotContainer {
 
     drivetrain.setDefaultCommand(new SwerveDriveCommand(drivetrain, driverControls));
     // testing 
-    var cmd = new MK3_AngleSpeed(driverControls, drivetrain, 1);  // FL, FR, BL, BR (0..3)
-    drivetrain.setDefaultCommand(cmd);
+    // var cmd = new MK3_AngleSpeed(driverControls, drivetrain, 0);  // FL, FR, BL, BR (0..3)
+    //drivetrain.setDefaultCommand(cmd);
 
     //testing commands, speed in meters per sec, angle in degrees
-    driverControls.bind(Id.Driver, XboxPOV.POV_UP).whenHeld(new SwerveDriveTest(drivetrain, 0, 0));
-    driverControls.bind(Id.Driver, XboxPOV.POV_RIGHT).whenHeld(new SwerveDriveTest(drivetrain, 0, 90));
-    driverControls.bind(Id.Driver, XboxPOV.POV_DOWN).whenHeld(new SwerveDriveTest(drivetrain, 0, 180));
-    driverControls.bind(Id.Driver, XboxPOV.POV_LEFT).whenHeld(new SwerveDriveTest(drivetrain, 0, -90));
+    driverControls.bind(Id.Driver, XboxPOV.POV_UP).whenHeld(new SwerveDriveTest(drivetrain, 1, 0));
+    driverControls.bind(Id.Driver, XboxPOV.POV_RIGHT).whenHeld(new SwerveDriveTest(drivetrain, 1, 90));
+    driverControls.bind(Id.Driver, XboxPOV.POV_DOWN).whenHeld(new SwerveDriveTest(drivetrain, 1, 180));
+    driverControls.bind(Id.Driver, XboxPOV.POV_LEFT).whenHeld(new SwerveDriveTest(drivetrain, 1, -90));
 
   }
 }

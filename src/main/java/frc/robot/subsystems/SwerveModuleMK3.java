@@ -128,7 +128,6 @@ public class SwerveModuleMK3 {
     double pos_deg = absEncoder.getAbsolutePosition();
     // set to absolute starting angle of absEncoder
     angleEncoder.setPosition(angleCmdInvert*pos_deg);
-    double var = angleEncoder.getPosition();
     // anglePID.reset();
     // anglePID.calculate(pos_deg, pos_deg);
   }
@@ -222,14 +221,16 @@ public class SwerveModuleMK3 {
    *                     of the module
    */
   public void setDesiredState(SwerveModuleState desiredState) {
-    SwerveModuleState state = desiredState;//SwerveModuleState.optimize(desiredState, currentRotation);
+    SwerveModuleState state = desiredState;
+    SwerveModuleState.optimize(desiredState, Rotation2d.fromDegrees(m_internalAngle));
 
     // use position control on angle with INTERNAL encoder, scaled internally for degrees
     angle_target = angleCmdInvert * state.angle.getDegrees();
     angleMotorPID.setReference(angle_target, ControlType.kPosition);
 
     // use velocity control, internally scales for ft/s.
-    feetPerSecondGoal = Units.metersToFeet(state.speedMetersPerSecond);
+    //feetPerSecondGoal = Units.metersToFeet(state.speedMetersPerSecond);
+    feetPerSecondGoal = state.speedMetersPerSecond;
     driveMotorPID.setReference(feetPerSecondGoal, ControlType.kVelocity); 
   }
 
