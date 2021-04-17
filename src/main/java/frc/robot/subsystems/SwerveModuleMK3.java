@@ -76,7 +76,7 @@ public class SwerveModuleMK3 {
     absEncoder = absEnc;
 
     // account for command sign differences if needed
-    _setInvertAngleCmd(invertAngleCmd);
+    angleCmdInvert = (invertAngleCmd) ? -1.0 : 1.0;
 
     // Drive Motor config
     driveMotor.setInverted(invertDrive);
@@ -112,17 +112,23 @@ public class SwerveModuleMK3 {
   }
 
   void calibrate(double offsetDegrees) {
-
+    periodic();
     // adjust magnetic offset in absEncoder, measured constants.
     absEncoderConfiguration = new CANCoderConfiguration();
     absEncoder.getAllConfigs(absEncoderConfiguration); // read existing settings (debug)
     absEncoderConfiguration.magnetOffsetDegrees = offsetDegrees; // correct offset
-    absEncoder.configMagnetOffset(offsetDegrees); // update corrected offset
-
-    // now read absEncoder position
+    var error = absEncoder.configMagnetOffset(offsetDegrees,30); // update corrected offset
+    try {
+      Thread.sleep(100);
+    } catch (Exception e) {
+      //TODO: handle exception
+    }
+   
+   // now read absEncoder position
     double pos_deg = absEncoder.getAbsolutePosition();
     // set to absolute starting angle of absEncoder
-    angleEncoder.setPosition(pos_deg);
+    angleEncoder.setPosition(angleCmdInvert*pos_deg);
+    double var = angleEncoder.getPosition();
     // anglePID.reset();
     // anglePID.calculate(pos_deg, pos_deg);
   }
@@ -130,6 +136,7 @@ public class SwerveModuleMK3 {
   // _set<>  for testing during bring up.
   public void _setInvertAngleCmd(boolean invert) {
     angleCmdInvert = (invert) ? -1.0 : 1.0;
+    calibrate(absEncoderConfiguration.magnetOffsetDegrees);
   }
   public void _setInvertAngleMotor(boolean invert) {
     angleMotor.setInverted(invert);
@@ -223,7 +230,6 @@ public class SwerveModuleMK3 {
 
     // use velocity control, internally scales for ft/s.
     feetPerSecondGoal = Units.metersToFeet(state.speedMetersPerSecond);
-    feetPerSecondGoal = 0.0;
     driveMotorPID.setReference(feetPerSecondGoal, ControlType.kVelocity); 
   }
 

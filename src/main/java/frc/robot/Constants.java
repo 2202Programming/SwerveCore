@@ -144,10 +144,21 @@ public final class Constants {
         public static final PIDFController anglePIDF = new PIDFController(0.01, 0.0, 0.0, 0.0); 
         
         // CANCoder offsets for absolure calibration - stored in the magnet offset of the CC. [degrees]
-        public static final double CC_FL_OFFSET = -99.58;
-        public static final double CC_BL_OFFSET = 90.351;
-        public static final double CC_FR_OFFSET = -173.84;
-        public static final double CC_BR_OFFSET = -27.24;
+        // public static final double CC_FL_OFFSET = -99.58;
+        // public static final double CC_BL_OFFSET = 90.351;
+        // public static final double CC_FR_OFFSET = -173.84;
+        // public static final double CC_BR_OFFSET = -27.24;
+
+        public static final double CC_FL_OFFSET = -99.667;
+        public static final double CC_BL_OFFSET = 90.43;
+        public static final double CC_FR_OFFSET = -175.25;
+        public static final double CC_BR_OFFSET = -28.38;
+
+        // public static final double CC_FL_OFFSET = 0;
+        // public static final double CC_BL_OFFSET = 0;
+        // public static final double CC_FR_OFFSET = 0;
+        // public static final double CC_BR_OFFSET = 0;
+
 
         // Kinematics model - wheel offsets from center of robot (0, 0)
         // Left Front given below, symmetry used for others
