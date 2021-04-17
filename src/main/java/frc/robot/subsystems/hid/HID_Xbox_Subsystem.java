@@ -102,8 +102,8 @@ public class HID_Xbox_Subsystem extends MonitoredSubsystemBase implements Driver
 
     // XYRot or Swerve Drive
     // Rotation on Left-X axis,  X-Y throttle on Right
-    velXShaper = new ExpoShaper(velExpo,  () -> driver.getY(Hand.kRight));   
-    velYShaper = new ExpoShaper(velExpo,  () -> driver.getX(Hand.kRight));
+    velXShaper = new ExpoShaper(velExpo,  () -> driver.getY(Hand.kRight)); // X robot is Y axis on Joystick
+    velYShaper = new ExpoShaper(velExpo,  () -> driver.getX(Hand.kRight)); // Y robot is X axis on Joystick
     swRotShaper = new ExpoShaper(rotExpo, () -> driver.getX(Hand.kLeft));  
 
     // add some deadzone in normalized coordinates
@@ -150,8 +150,8 @@ public class HID_Xbox_Subsystem extends MonitoredSubsystemBase implements Driver
     limitTankRotation();
 
     //XYRot - field axis, pos X away from driver station, pos y to left side of field
-    velY = -velXShaper.get();    //invert, so right stick moves robot, right, lowering Y 
-    velX = -velYShaper.get();    //invert, so forward stick is positive, increase X
+    velX = -velXShaper.get();    //invert, so right stick moves robot, right, lowering Y 
+    velY = -velYShaper.get();    //invert, so forward stick is positive, increase X
     xyRot = -swRotShaper.get();  //invert, so positive is CCW 
   }
   

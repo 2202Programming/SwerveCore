@@ -189,4 +189,11 @@ public class SwerveDrivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Right Back Goal Angle", modules[3].angleGoal);
     */
   }
+
+  public SwerveModuleMK3 getMK3(int modID) {
+    return modules[modID];
+  }
+
+
+
 }

@@ -6,6 +6,7 @@ package frc.robot;
 
 import frc.robot.Constants.DriverPrefs;
 import frc.robot.commands.SwerveDriveCommand;
+import frc.robot.commands.test.MK3_AngleSpeed;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
@@ -33,5 +34,9 @@ public class RobotContainer {
     drivetrain = new SwerveDrivetrain();
 
     drivetrain.setDefaultCommand(new SwerveDriveCommand(drivetrain, driverControls));
+    // testing 
+    var cmd = new MK3_AngleSpeed(driverControls, drivetrain, 1);  // FL, FR, BL, BR (0..3)
+    drivetrain.setDefaultCommand(cmd);
+
   }
 }

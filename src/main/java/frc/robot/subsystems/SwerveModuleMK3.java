@@ -34,75 +34,76 @@ public class SwerveModuleMK3 {
   private final CANEncoder  driveEncoder;
   //CTRE devices
   private final CANCoder absEncoder;            // aka externalAngle (external to Neo/Smartmax)
-  private final double angleCmdInvert;
+  private double angleCmdInvert;
 
   // Software PID - TBD unused-TBD if needed
-  //private final PIDController anglePID = new PIDController(0.001, 0.0, 0.0);   
-  //final double MAX_ANGLE_MOTOR_OUTPUT = 0.1;   // [0.0 to 1.0] 
-  
+  // private final PIDController anglePID = new PIDController(0.001, 0.0, 0.0);
+  // final double MAX_ANGLE_MOTOR_OUTPUT = 0.1; // [0.0 to 1.0]
+
   /**
    * Warning CANCoder and CANEncoder are very close in name but very different.
    * 
-   * CANCoder:    CTRE, absolute position mode, +/- 180 CCW= positive
-   * CANEncoder:  RevRobotics, relative position only, must configure to CCW based on side & gearing
-   *              Continous positon so postion can be greater than 180 because it can "infinitely" rotate.
-   *              Cannot be inverted in Brushless mode, must invert motor
+   * CANCoder: CTRE, absolute position mode, +/- 180 CCW= positive CANEncoder:
+   * RevRobotics, relative position only, must configure to CCW based on side &
+   * gearing Continous positon so postion can be greater than 180 because it can
+   * "infinitely" rotate. Cannot be inverted in Brushless mode, must invert motor
    * 
    */
-  //for debugging
+  // for debugging
   CANCoderConfiguration absEncoderConfiguration;
 
   /**
-   *  TBD if we need PID on RIO
-  public double angleGoal;
-  public double RPMGoal;
-  public double angleMotorOutput;
-  public double angleError;
-  **/
+   * TBD if we need PID on RIO public double angleGoal; public double RPMGoal;
+   * public double angleMotorOutput; public double angleError;
+   **/
 
   // NetworkTables
   String NTPrefix;
 
-  // measurements made every period - public so they can be pulled for network tables...
+  // measurements made every period - public so they can be pulled for network
+  // tables...
   public double m_internalAngle;
   public double m_externalAngle;
   public double m_velocity;
 
   public SwerveModuleMK3(CANSparkMax driveMtr, CANSparkMax angleMtr, double offsetDegrees, CANCoder absEnc,
-    boolean invertAngleMtr, boolean invertAngleCmd, boolean invertDrive) {
+      boolean invertAngleMtr, boolean invertAngleCmd, boolean invertDrive) {
     driveMotor = driveMtr;
     angleMotor = angleMtr;
     absEncoder = absEnc;
-    
-    //account for command sign differences if needed
-    angleCmdInvert = (invertAngleCmd) ? -1.0 : 1.0;
+
+    // account for command sign differences if needed
+    _setInvertAngleCmd(invertAngleCmd);
 
     // Drive Motor config
     driveMotor.setInverted(invertDrive);
     driveMotor.setIdleMode(IdleMode.kBrake);
     driveMotorPID = driveMotor.getPIDController();
     driveEncoder = driveMotor.getEncoder();
-    //set driveEncoder to use ft/s
-    driveEncoder.setPositionConversionFactor(Math.PI*DriveTrain.wheelDiameter/DriveTrain.kDriveGR);      // mo-rotations to ft
-    driveEncoder.setVelocityConversionFactor(Math.PI*DriveTrain.wheelDiameter/DriveTrain.kDriveGR/60.0); // mo-rpm to ft/s
+    // set driveEncoder to use ft/s
+    driveEncoder.setPositionConversionFactor(Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR); // mo-rotations
+                                                                                                        // to ft
+    driveEncoder.setVelocityConversionFactor(Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR / 60.0); // mo-rpm
+                                                                                                               // to
+                                                                                                               // ft/s
 
-    //Angle Motor config
+    // Angle Motor config
     angleMotor.setInverted(invertAngleMtr);
     angleMotor.setIdleMode(IdleMode.kBrake);
     angleMotorPID = angleMotor.getPIDController();
     angleEncoder = angleMotor.getEncoder();
-    
-    //set angle endcoder to return values in deg and deg/s
-    angleEncoder.setPositionConversionFactor(360.0/DriveTrain.kSteeringGR);        // mo-rotations to degrees
-    angleEncoder.setVelocityConversionFactor(360.0/DriveTrain.kSteeringGR/60.0);   // rpm to deg/s
-   
+
+    // set angle endcoder to return values in deg and deg/s
+    angleEncoder.setPositionConversionFactor(360.0 / DriveTrain.kSteeringGR); // mo-rotations to degrees
+    angleEncoder.setVelocityConversionFactor(360.0 / DriveTrain.kSteeringGR / 60.0); // rpm to deg/s
+
     // Pid around absEncoder angle to assist angleMotor interal PID - TBD
-    // DPL - maybe use this to close error after calibration?  
-    //anglePID.enableContinuousInput(-180.0, 180.0);              // -180 == +180
+    // DPL - maybe use this to close error after calibration?
+    // anglePID.enableContinuousInput(-180.0, 180.0); // -180 == +180
 
     // SparkMax PID values
-    DriveTrain.anglePIDF.copyTo(angleMotorPID, kSlot);          // position mode 
-    DriveTrain.drivePIDF.copyTo(driveMotorPID, kSlot);          // velocity mode
+    DriveTrain.anglePIDF.copyTo(angleMotorPID, kSlot); // position mode
+    DriveTrain.drivePIDF.copyTo(driveMotorPID, kSlot); // velocity mode
 
     calibrate(offsetDegrees);
   }
@@ -111,18 +112,28 @@ public class SwerveModuleMK3 {
 
     // adjust magnetic offset in absEncoder, measured constants.
     absEncoderConfiguration = new CANCoderConfiguration();
-    absEncoder.getAllConfigs(absEncoderConfiguration);           // read existing settings (debug)
+    absEncoder.getAllConfigs(absEncoderConfiguration); // read existing settings (debug)
     absEncoderConfiguration.magnetOffsetDegrees = offsetDegrees; // correct offset
-    absEncoder.configMagnetOffset(offsetDegrees);                // update corrected offset
-    
+    absEncoder.configMagnetOffset(offsetDegrees); // update corrected offset
+
     // now read absEncoder position
     double pos_deg = absEncoder.getAbsolutePosition();
     // set to absolute starting angle of absEncoder
-    angleEncoder.setPosition(pos_deg);     
-    //anglePID.reset();
-    //anglePID.calculate(pos_deg, pos_deg);
+    angleEncoder.setPosition(pos_deg);
+    // anglePID.reset();
+    // anglePID.calculate(pos_deg, pos_deg);
   }
 
+  // _set<>  for testing during bring up.
+  public void _setInvertAngleCmd(boolean invert) {
+    angleCmdInvert = (invert) ? -1.0 : 1.0;
+  }
+  public void _setInvertAngleMotor(boolean invert) {
+    angleMotor.setInverted(invert);
+  }
+  public void _setInvertDriveMotor(boolean invert) {
+    driveMotor.setInverted(invert);
+  }
   /**
    *  setNTPrefix - causes the network table entries to be created 
    *  and updated on the periodic() call.
@@ -131,9 +142,13 @@ public class SwerveModuleMK3 {
    * 
    */
   public SwerveModuleMK3 setNTPrefix(String prefix) {
-    this.NTPrefix = "/MK3-" + prefix;
+    NTPrefix = "/MK3-" + prefix;
     NTConfig();
     return this;
+  }
+
+  public String getNTPrefix() { 
+    return NTPrefix; 
   }
 
   public void periodic() {
