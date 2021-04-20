@@ -54,8 +54,33 @@ public class SwerveModuleMK3 {
   double m_internalAngle;    // measured Neo unbounded [deg]
   double m_externalAngle;    // measured CANCoder bounded +/-180 [deg]
   double m_velocity;         // measured velocity [ft/s]
-  double m_angle_target;    // desired angle unbounded [deg]
-  double m_vel_target;      // desired velocity [ft/s]
+  double m_angle_target;     // desired angle unbounded [deg]
+  double m_vel_target;       // desired velocity [ft/s]
+
+  /**
+   * SwerveModuleMK3 - 
+   * 
+   *  SmartMax controllers used for angle and velocity motors. 
+   * 
+   *  SmartMax Velocity mode is used to close the velocity loop.  Units will match the units of the
+   *  drive-wheel-diameter.  [ft/s]
+   *  
+   *  Angle in degrees is controlled using position mode on the SmartMax. The angle positon is not constrainted to
+   *  +/- 180 degrees because the Neo has 32bit float resolution, so we can just let the postion grow or shrink
+   *  based on the how many degrees we need to change.  We could rotate 1000's of time without going
+   *  past the resolution of the SmartMax's position tracking.  [deg]
+   *  
+   *  Example: 
+   *    cmd_angle = 175 ==> 175 + (n * 360) where  -Turns < n < Turns
+   *              ==> ... -545 ==  -185 == 175 == 535 == 895 ...
+   *  
+   *  Minimum number of turns in one direction before we would have to consider overflow:
+   *    Turns = posBitResolution / encoder-counts
+   *    Turns = 2^23 / (42*12.8)  = 15,603            
+   * 
+   *  Batteries will need changing before then.
+   * 
+   */
 
   public SwerveModuleMK3(CANSparkMax driveMtr, CANSparkMax angleMtr, double offsetDegrees, CANCoder absEnc,
       boolean invertAngleMtr, boolean invertAngleCmd, boolean invertDrive) {
