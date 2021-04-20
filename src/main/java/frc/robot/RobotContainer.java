@@ -6,13 +6,9 @@ package frc.robot;
 
 import frc.robot.Constants.DriverPrefs;
 import frc.robot.commands.SwerveDriveCommand;
-import frc.robot.commands.test.MK3_AngleSpeed;
-import frc.robot.commands.test.SwerveDriveTest;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
-import frc.robot.subsystems.hid.XboxPOV;
-import frc.robot.subsystems.ifx.DriverControls.Id;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -32,20 +28,24 @@ public class RobotContainer {
   public RobotContainer() {
     RobotContainer.rc = this;
 
+    //create our subsystems
     sensors = new Sensors_Subsystem();
     driverControls = new HID_Xbox_Subsystem(DriverPrefs.VelExpo, DriverPrefs.RotationExpo, DriverPrefs.StickDeadzone); 
     drivetrain = new SwerveDrivetrain();
 
+    // set default commands
     drivetrain.setDefaultCommand(new SwerveDriveCommand(drivetrain, driverControls));
-    // testing 
+  }
+
+  // testing 
+  void test_controls() {
     // var cmd = new MK3_AngleSpeed(driverControls, drivetrain, 0);  // FL, FR, BL, BR (0..3)
     //drivetrain.setDefaultCommand(cmd);
 
-    //testing commands, speed in meters per sec, angle in degrees
-    driverControls.bind(Id.Driver, XboxPOV.POV_UP).whenHeld(new SwerveDriveTest(drivetrain, 1, 0));
-    driverControls.bind(Id.Driver, XboxPOV.POV_RIGHT).whenHeld(new SwerveDriveTest(drivetrain, 1, 90));
-    driverControls.bind(Id.Driver, XboxPOV.POV_DOWN).whenHeld(new SwerveDriveTest(drivetrain, 1, 180));
-    driverControls.bind(Id.Driver, XboxPOV.POV_LEFT).whenHeld(new SwerveDriveTest(drivetrain, 1, -90));
-
+    //testing commands, speed in feet per sec, angle in degrees
+    //driverControls.bind(Id.Driver, XboxPOV.POV_UP).whenHeld(new SwerveDriveTest(drivetrain, 1, 0));
+    //driverControls.bind(Id.Driver, XboxPOV.POV_RIGHT).whenHeld(new SwerveDriveTest(drivetrain, 1, 90));
+    //driverControls.bind(Id.Driver, XboxPOV.POV_DOWN).whenHeld(new SwerveDriveTest(drivetrain, 1, 180));
+    //driverControls.bind(Id.Driver, XboxPOV.POV_LEFT).whenHeld(new SwerveDriveTest(drivetrain, 1, -90));
   }
 }

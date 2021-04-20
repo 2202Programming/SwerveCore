@@ -1,4 +1,4 @@
-package frc.robot.util.misc;
+package frc.robot.util;
 
 import static frc.robot.Constants.DT;
 

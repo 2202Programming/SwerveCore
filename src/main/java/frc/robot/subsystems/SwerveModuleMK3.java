@@ -5,25 +5,24 @@ import com.ctre.phoenix.sensors.CANCoderConfiguration;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
+import com.revrobotics.ControlType;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.util.Units;
 import frc.robot.Constants.DriveTrain;
+import frc.robot.util.ModMath;
 
 
 public class SwerveModuleMK3 {
   public final String NT_Name = "DT";  //expose data under DriveTrain table
 
+  // Hardware PID settings in Constants.DriveTrain PIDFController 
   // PID slot for angle and drive pid on SmartMax controller
   final int kSlot = 0;    
-
-  // Hardware PID settings in Constants.DriveTrain PIDFController 
 
   // Rev devices
   private final CANSparkMax driveMotor;
@@ -36,10 +35,6 @@ public class SwerveModuleMK3 {
   private final CANCoder absEncoder;            // aka externalAngle (external to Neo/Smartmax)
   private double angleCmdInvert;
 
-  // Software PID - TBD unused-TBD if needed
-  // private final PIDController anglePID = new PIDController(0.001, 0.0, 0.0);
-  // final double MAX_ANGLE_MOTOR_OUTPUT = 0.1; // [0.0 to 1.0]
-
   /**
    * Warning CANCoder and CANEncoder are very close in name but very different.
    * 
@@ -49,25 +44,18 @@ public class SwerveModuleMK3 {
    * "infinitely" rotate. Cannot be inverted in Brushless mode, must invert motor
    * 
    */
-  // for debugging
+  // keep for debugging
   CANCoderConfiguration absEncoderConfiguration;
-
-  /**
-   * TBD if we need PID on RIO public double angleGoal; public double RPMGoal;
-   * public double angleMotorOutput; public double angleError;
-   **/
 
   // NetworkTables
   String NTPrefix;
 
-  // measurements made every period - public so they can be pulled for network
-  // tables...
-  public double m_internalAngle;
-  public double m_externalAngle;
-  public double m_velocity;
-
-  private double angle_target;
-  private double feetPerSecondGoal;
+  // measurements made every period - public so they can be pulled for network tables...
+  double m_internalAngle;    // measured Neo unbounded [deg]
+  double m_externalAngle;    // measured CANCoder bounded +/-180 [deg]
+  double m_velocity;         // measured velocity [ft/s]
+  double m_angle_target;    // desired angle unbounded [deg]
+  double m_vel_target;      // desired velocity [ft/s]
 
   public SwerveModuleMK3(CANSparkMax driveMtr, CANSparkMax angleMtr, double offsetDegrees, CANCoder absEnc,
       boolean invertAngleMtr, boolean invertAngleCmd, boolean invertDrive) {
@@ -77,6 +65,7 @@ public class SwerveModuleMK3 {
 
     // account for command sign differences if needed
     angleCmdInvert = (invertAngleCmd) ? -1.0 : 1.0;
+    setMagOffset(offsetDegrees);
 
     // Drive Motor config
     driveMotor.setInverted(invertDrive);
@@ -84,11 +73,8 @@ public class SwerveModuleMK3 {
     driveMotorPID = driveMotor.getPIDController();
     driveEncoder = driveMotor.getEncoder();
     // set driveEncoder to use ft/s
-    driveEncoder.setPositionConversionFactor(Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR); // mo-rotations
-                                                                                                        // to ft
-    driveEncoder.setVelocityConversionFactor(Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR / 60.0); // mo-rpm
-                                                                                                               // to
-                                                                                                               // ft/s
+    driveEncoder.setPositionConversionFactor(Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR); // mo-rot to ft
+    driveEncoder.setVelocityConversionFactor(Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR / 60.0); // mo-rpm to ft/s
 
     // Angle Motor config
     angleMotor.setInverted(invertAngleMtr);
@@ -100,42 +86,55 @@ public class SwerveModuleMK3 {
     angleEncoder.setPositionConversionFactor(360.0 / DriveTrain.kSteeringGR); // mo-rotations to degrees
     angleEncoder.setVelocityConversionFactor(360.0 / DriveTrain.kSteeringGR / 60.0); // rpm to deg/s
 
-    // Pid around absEncoder angle to assist angleMotor interal PID - TBD
-    // DPL - maybe use this to close error after calibration?
-    // anglePID.enableContinuousInput(-180.0, 180.0); // -180 == +180
-
     // SparkMax PID values
     DriveTrain.anglePIDF.copyTo(angleMotorPID, kSlot); // position mode
     DriveTrain.drivePIDF.copyTo(driveMotorPID, kSlot); // velocity mode
 
-    calibrate(offsetDegrees);
+    // burn the motor flash
+    angleMotor.burnFlash();
+    driveMotor.burnFlash();
+    
+    //todo - do we still need the sleep with the re-order?
+    sleep(50);   //hack to allow absEncoder config to be delivered???
+    calibrate();
   }
 
-  void calibrate(double offsetDegrees) {
-    periodic();
+  /**
+   * This adjusts the absEncoder with the given offset to correct for CANCoder
+   * mounting position. This value should be persistent accross power cycles.
+   * 
+   * Warning, we had to sleep afer setting configs before the absolute
+   * position could be read in calibrate.
+   * @param offsetDegrees
+   */
+  void setMagOffset(double offsetDegrees) {
     // adjust magnetic offset in absEncoder, measured constants.
     absEncoderConfiguration = new CANCoderConfiguration();
-    absEncoder.getAllConfigs(absEncoderConfiguration); // read existing settings (debug)
-    absEncoderConfiguration.magnetOffsetDegrees = offsetDegrees; // correct offset
-    var error = absEncoder.configMagnetOffset(offsetDegrees,30); // update corrected offset
-    try {
-      Thread.sleep(100);
-    } catch (Exception e) {
-      //TODO: handle exception
+    absEncoder.getAllConfigs(absEncoderConfiguration); 
+    // if different, update
+    if (offsetDegrees != absEncoderConfiguration.magnetOffsetDegrees) {
+      absEncoderConfiguration.magnetOffsetDegrees = offsetDegrees;
+      absEncoder.configAllSettings(absEncoderConfiguration, 50);
     }
-   
-   // now read absEncoder position
-    double pos_deg = absEncoder.getAbsolutePosition();
-    // set to absolute starting angle of absEncoder
-    angleEncoder.setPosition(angleCmdInvert*pos_deg);
-    // anglePID.reset();
-    // anglePID.calculate(pos_deg, pos_deg);
   }
+
+   
+  /**
+   *  calibrate() - aligns Neo internal position with absolute encoder.
+   *    This needs to be done at power up, or when the unbounded encoder gets
+   *    close to its overflow point.
+   */
+  void calibrate() {
+    // read absEncoder position, set internal angleEncoder to that value adjust for cmd inversion.
+    double pos_deg = absEncoder.getAbsolutePosition();
+    angleEncoder.setPosition(angleCmdInvert*pos_deg);   
+  }
+
 
   // _set<>  for testing during bring up.
   public void _setInvertAngleCmd(boolean invert) {
     angleCmdInvert = (invert) ? -1.0 : 1.0;
-    calibrate(absEncoderConfiguration.magnetOffsetDegrees);
+    calibrate();
   }
   public void _setInvertAngleMotor(boolean invert) {
     angleMotor.setInverted(invert);
@@ -205,14 +204,6 @@ public class SwerveModuleMK3 {
     return m_velocity;
   }
 
-  //sets a -180 to 180 paradigm for angle
-  public double angleFix(double angle) { 
-    if (angle > 180) {
-      return angle - 360;
-    } else {
-      return angle;
-    }
-  }
 
   /**
    * Set the speed + rotation of the swerve module from a SwerveModuleState object
@@ -224,40 +215,17 @@ public class SwerveModuleMK3 {
     SwerveModuleState state = SwerveModuleState.optimize(desiredState, Rotation2d.fromDegrees(m_internalAngle));
 
     // use position control on angle with INTERNAL encoder, scaled internally for degrees
-    angle_target = angleCmdInvert * state.angle.getDegrees();
-    angleMotorPID.setReference(angle_target, ControlType.kPosition);
+    m_angle_target = angleCmdInvert * state.angle.getDegrees();
 
-    // use velocity control, internally scales for ft/s.
-    //feetPerSecondGoal = Units.metersToFeet(state.speedMetersPerSecond);
-    feetPerSecondGoal = state.speedMetersPerSecond;
-    driveMotorPID.setReference(feetPerSecondGoal, ControlType.kVelocity); 
+    // figure out how far we need to move, target - current, bounded +/-180
+    double delta = ModMath.delta360(m_angle_target, m_internalAngle);
+
+    // now add that delta to unbounded Neo angle, m_internal isn't range bound
+    angleMotorPID.setReference(m_internalAngle + delta, ControlType.kPosition);
+
+    // use velocity control, in ft/s (ignore variable name)
+    driveMotorPID.setReference(state.speedMetersPerSecond, ControlType.kVelocity); 
   }
-
-  /**
-   * The code below will use a RIO pid loop around the CANCode and use the 
-   * angleMotor in velocity mode.
-   * 
-   */
-  /**  TBD
-  void testing_setDesiredState(SwerveModuleState desiredState) {
-    Rotation2d currentRotation = getAngleRot2d();
-    // Find the difference between our current rotational position + our new
-    // rotational position
-    SwerveModuleState state = SwerveModuleState.optimize(desiredState, currentRotation);
-  
-    // use a PID loop around simple %motor output
-    double angleGoal = currentRotation.getDegrees();
-    double angleCmd = anglePID.calculate(currentRotation.getDegrees(), angleGoal);
-  
-    angleMotorOutput = MathUtil.clamp( angleCmd, -MAX_ANGLE_MOTOR_OUTPUT, MAX_ANGLE_MOTOR_OUTPUT);
-    angleMotor.set(angleMotorOutput); // roborio PID for angle, clamping max output
-
-    // set the velocity of the drive, scaled to use ft/s
-    double feetPerSecondGoal = Units.metersToFeet(state.speedMetersPerSecond);
-    feetPerSecondGoal = 0.0;
-    driveMotorPID.setReference(feetPerSecondGoal, ControlType.kVelocity);
-  }
-  ***/
 
   /**
    * Network Tables data 
@@ -270,7 +238,7 @@ public class SwerveModuleMK3 {
   private NetworkTableEntry nte_external_angle;
   private NetworkTableEntry nte_velocity;
   private NetworkTableEntry nte_angle_target;
-  private NetworkTableEntry nte_feetPerSecondGoal;
+  private NetworkTableEntry nte_vel_target;
 
   void NTConfig() {
     // direct networktables logging
@@ -279,7 +247,7 @@ public class SwerveModuleMK3 {
     nte_external_angle = table.getEntry(NTPrefix +"/angle_ext");
     nte_velocity = table.getEntry(NTPrefix + "/velocity");
     nte_angle_target = table.getEntry(NTPrefix + "/angle_target");
-    nte_feetPerSecondGoal = table.getEntry(NTPrefix + "/FPS_target");
+    nte_vel_target = table.getEntry(NTPrefix + "/velocity_target");
     
 
   }
@@ -289,8 +257,14 @@ public class SwerveModuleMK3 {
     nte_angle.setDouble(m_internalAngle);
     nte_external_angle.setDouble(m_externalAngle);
     nte_velocity.setDouble(m_velocity);
-    nte_angle_target.setDouble(angle_target);
-    nte_feetPerSecondGoal.setDouble(feetPerSecondGoal);
+    nte_angle_target.setDouble(m_angle_target);
+    nte_vel_target.setDouble(m_vel_target);
+  }
+
+  void sleep( long ms) {
+    try {
+      Thread.sleep(ms);
+    } catch (Exception e) { }
   }
 
 }

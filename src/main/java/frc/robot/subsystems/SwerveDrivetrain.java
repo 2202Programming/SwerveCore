@@ -12,21 +12,18 @@ import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.RobotContainer;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.DriveTrain;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.Sensors_Subsystem.EncoderID;
 
 public class SwerveDrivetrain extends SubsystemBase {
-
-  
   /**
-   * Inversions 
+   * Inversions account for rotations of the module relative to left or right side of robot.
    * 
    *  CANCoders are setup in Sensors and will have CCW= positve convention. Their offsets
-   *  are adjusted by their use in the drivetraind.  
+   *  are adjusted by their use in the drive train.  
    */
   boolean kDriveMotorInvert_Right = true;
   boolean kAngleMotorInvert_Right = true;
@@ -34,34 +31,22 @@ public class SwerveDrivetrain extends SubsystemBase {
   boolean kDriveMotorInvert_Left = false;
   boolean kAngleMotorInvert_Left = false;
   boolean kAngleCmdInvert_Left = false;
-
-
-  /***
-   * 
-   * 4/14/21   RHS is spliting encoders,  RB_int =-48  RB_CC = +52  actual = 45 CCW(pos)
-   *                                      RF_int =-38  RF_CC = +49  actual = 45 CCW(pos)
-   * 
-   *  Test performed: align to zero, calibrate with offset, then manually move wheel to 45 deg.
-   * 
-   * 
-   * TODD:  fix the rotation sign between CC and internal.
-   * 
-   */
   /**
    *
    * Modules are in the order of -
-   * Front Left
-   * Front Right
-   * Back Left
-   * Back Right
+   *   Front Left
+   *   Front Right
+   *   Back Left
+   *   Back Right
    * 
-   * Positive x values represent moving toward the front of the robot whereas
-   * positive y values represent moving toward the left of the robot
+   * Positive x values represent moving toward the front of the robot
+   * Positive y values represent moving toward the left of the robot
+   * All lengths in feet.
    * https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/swerve-drive-kinematics.html#constructing-the-kinematics-object
    */
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
-    new Translation2d(DriveTrain.XwheelOffset, DriveTrain.YwheelOffset),  // Front Left
-    new Translation2d(DriveTrain.XwheelOffset, -DriveTrain.YwheelOffset),   // Front Right
+    new Translation2d(DriveTrain.XwheelOffset, DriveTrain.YwheelOffset),   // Front Left
+    new Translation2d(DriveTrain.XwheelOffset, -DriveTrain.YwheelOffset),  // Front Right
     new Translation2d(-DriveTrain.XwheelOffset, DriveTrain.YwheelOffset),  // Back Left
     new Translation2d(-DriveTrain.XwheelOffset, -DriveTrain.YwheelOffset)  // Back Right
   );
@@ -124,73 +109,33 @@ public class SwerveDrivetrain extends SubsystemBase {
   }
 
 
+  // used for testing
   public void testDrive(double speed, double angle) { 
     // output the angle and speed (meters per sec)  for each module
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < modules.length; i++) {
       modules[i].setDesiredState(new SwerveModuleState(speed, new Rotation2d(Math.toRadians(angle))));
     }
   }
 
-  public double angleFix(double angle) {
-    if (angle > 180){
-      return angle-360;
-    } else {
-    return angle;
-    }
-  }
 
   @Override
   public void periodic() {
-    //update internal angle 
-    for (int i = 0; i < 4; i++) {
+    //update data from each of the swerve drive modules.
+    for (int i = 0; i < modules.length; i++) {
       modules[i].periodic();
     }
-    // This method will be called once per scheduler run
-   /* may be used by TBD RIO PID LOOP 
-    SmartDashboard.putNumber("Left Front Goal RPMs", modules[0].RPMGoal);
-    SmartDashboard.putNumber("Right Front Goal RPMs", modules[1].RPMGoal);
-    SmartDashboard.putNumber("Left Back Goal RPMs", modules[2].RPMGoal);
-    SmartDashboard.putNumber("Right Back Goal RPMs", modules[3].RPMGoal);
-
-    SmartDashboard.putNumber("Left Front Goal Angle", modules[0].angleGoal);
-    SmartDashboard.putNumber("Right Front Goal Angle", modules[1].angleGoal);
-    SmartDashboard.putNumber("Left Back Goal Angle", modules[2].angleGoal);
-    SmartDashboard.putNumber("Right Back Goal Angle", modules[3].angleGoal);
-
-    SmartDashboard.putNumber("Left Front AngleMotor Output", modules[0].angleMotorOutput);
-    SmartDashboard.putNumber("Right Front AngleMotor Output", modules[1].angleMotorOutput);
-    SmartDashboard.putNumber("Left Back AngleMotor Outpute", modules[2].angleMotorOutput);
-    SmartDashboard.putNumber("Right Back AngleMotor Output", modules[3].angleMotorOutput);
-
-    SmartDashboard.putNumber("Left Front AngleMotor Error", modules[0].angleError);
-    SmartDashboard.putNumber("Right Front AngleMotor Error", modules[1].angleError);
-    SmartDashboard.putNumber("Left Back AngleMotor Error", modules[2].angleError);
-    SmartDashboard.putNumber("Right Back AngleMotor Error", modules[3].angleError);
-    */
-
   }
 
   @Override
   public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
-
-    /**  TBD - if RIO PID loop is needed
-    SmartDashboard.putNumber("Left Front Goal RPMs", modules[0].RPMGoal);
-    SmartDashboard.putNumber("Right Front Goal RPMs", modules[1].RPMGoal);
-    SmartDashboard.putNumber("Left Back Goal RPMs", modules[2].RPMGoal);
-    SmartDashboard.putNumber("Right Back Goal RPMs", modules[3].RPMGoal);
-
-    SmartDashboard.putNumber("Left Front Goal Angle", modules[0].angleGoal);
-    SmartDashboard.putNumber("Right Front Goal Angle", modules[1].angleGoal);
-    SmartDashboard.putNumber("Left Back Goal Angle", modules[2].angleGoal);
-    SmartDashboard.putNumber("Right Back Goal Angle", modules[3].angleGoal);
-    */
+    //  any sim work for each module
+    for (int i = 0; i < modules.length; i++) {
+     // modules[i].periodic();
+    }
   }
 
   public SwerveModuleMK3 getMK3(int modID) {
+    if ((modID < 0) || (modID > modules.length -1))  return null;
     return modules[modID];
   }
-
-
-
 }
