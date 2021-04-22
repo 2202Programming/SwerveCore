@@ -81,6 +81,7 @@ public class SwerveModuleMK3 {
    *  Batteries will need changing before then.
    * 
    */
+String myprefix;
 
   public SwerveModuleMK3(CANSparkMax driveMtr, CANSparkMax angleMtr, double offsetDegrees, CANCoder absEnc,
       boolean invertAngleMtr, boolean invertAngleCmd, boolean invertDrive) {
@@ -176,6 +177,7 @@ public class SwerveModuleMK3 {
    */
   public SwerveModuleMK3 setNTPrefix(String prefix) {
     NTPrefix = "/MK3-" + prefix;
+    myprefix = prefix;
     NTConfig();
     return this;
   }
@@ -200,7 +202,7 @@ public class SwerveModuleMK3 {
    * @return SmartMax/Neo internal angle (degrees)
    */
   public Rotation2d getAngleRot2d() {
-    return Rotation2d.fromDegrees(m_internalAngle); // for cancoder
+    return Rotation2d.fromDegrees(m_internalAngle); 
   }
   public double getAngle() {
     return m_internalAngle;
@@ -229,7 +231,6 @@ public class SwerveModuleMK3 {
     return m_velocity;
   }
 
-
   /**
    * Set the speed + rotation of the swerve module from a SwerveModuleState object
    * 
@@ -237,17 +238,16 @@ public class SwerveModuleMK3 {
    *                     of the module
    */
   public void setDesiredState(SwerveModuleState desiredState) {
-    SwerveModuleState state = SwerveModuleState.optimize(desiredState, Rotation2d.fromDegrees(m_internalAngle));
-
-    // use position control on angle with INTERNAL encoder, scaled internally for degrees
-    m_angle_target = angleCmdInvert * state.angle.getDegrees();
+    SwerveModuleState state = desiredState; //SwerveModuleState.optimize(desiredState, Rotation2d.fromDegrees(m_internalAngle));
+   // use position control on angle with INTERNAL encoder, scaled internally for degrees
+    m_angle_target = state.angle.getDegrees();
 
     // figure out how far we need to move, target - current, bounded +/-180
     double delta = ModMath.delta360(m_angle_target, m_internalAngle);
-
+   
     // now add that delta to unbounded Neo angle, m_internal isn't range bound
-    angleMotorPID.setReference(m_internalAngle + delta, ControlType.kPosition);
-
+    angleMotorPID.setReference(angleCmdInvert*(m_internalAngle + delta), ControlType.kPosition);
+    
     // use velocity control, in ft/s (ignore variable name)
     driveMotorPID.setReference(state.speedMetersPerSecond, ControlType.kVelocity); 
   }

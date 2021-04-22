@@ -125,7 +125,7 @@ public final class Constants {
         public static final double wheelDiameter = 0.3333333;   //[ft]  4" wheels
 
         // Constraints on speeds enforeced in DriveTrain
-        public static final double kMaxSpeed = 4.0; // [ft/s]
+        public static final double kMaxSpeed = 6.0; // [ft/s]
         public static final double kMaxAngularSpeed = Math.PI; // [rad/s] 1/2 rotation per second
 
         /****
