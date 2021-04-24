@@ -238,13 +238,15 @@ String myprefix;
    *                     of the module
    */
   public void setDesiredState(SwerveModuleState desiredState) {
-    SwerveModuleState state = desiredState; //SwerveModuleState.optimize(desiredState, Rotation2d.fromDegrees(m_internalAngle));
+    SwerveModuleState state = SwerveModuleState.optimize(desiredState, Rotation2d.fromDegrees(m_internalAngle));
    // use position control on angle with INTERNAL encoder, scaled internally for degrees
     m_angle_target = state.angle.getDegrees();
 
     // figure out how far we need to move, target - current, bounded +/-180
     double delta = ModMath.delta360(m_angle_target, m_internalAngle);
-   
+    // if we aren't moving, keep the wheels pointed where they are
+    if (Math.abs(state.speedMetersPerSecond) < .01 ) delta = 0;
+
     // now add that delta to unbounded Neo angle, m_internal isn't range bound
     angleMotorPID.setReference(angleCmdInvert*(m_internalAngle + delta), ControlType.kPosition);
     
