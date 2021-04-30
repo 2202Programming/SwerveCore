@@ -252,6 +252,9 @@ String myprefix;
     driveMotorPID.setReference(state.speedMetersPerSecond, ControlType.kVelocity); 
   }
 
+  public CANEncoder getDriveEncoder(){
+    return driveEncoder;
+  }
   /**
    * Network Tables data 
    * 

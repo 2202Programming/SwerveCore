@@ -22,7 +22,7 @@ public class RobotContainer {
 
   public final HID_Xbox_Subsystem driverControls;
   public final Sensors_Subsystem sensors;
-  private final SwerveDrivetrain drivetrain;
+  public final SwerveDrivetrain drivetrain;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {

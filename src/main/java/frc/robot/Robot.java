@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.util.CharecterizationSubsytem;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -46,14 +47,18 @@ public class Robot extends TimedRobot {
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    robotContainer.drivetrain.testDrive(0,0);
+  }
 
   @Override
   public void disabledPeriodic() {}
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
-  public void autonomousInit() {}
+  public void autonomousInit() {
+    CharecterizationSubsytem m_charecterizationSubsystem = new CharecterizationSubsytem(robotContainer.drivetrain);
+  }
 
   /** This function is called periodically during autonomous. */
   @Override

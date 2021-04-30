@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
@@ -137,5 +138,12 @@ public class SwerveDrivetrain extends SubsystemBase {
   public SwerveModuleMK3 getMK3(int modID) {
     if ((modID < 0) || (modID > modules.length -1))  return null;
     return modules[modID];
+  }
+
+  public CANEncoder getDriveEncoder(int side){ //1 for right, 0 for left
+    if (side == 0){
+      return modules[0].getDriveEncoder();
+    }
+    else return modules[1].getDriveEncoder();
   }
 }
