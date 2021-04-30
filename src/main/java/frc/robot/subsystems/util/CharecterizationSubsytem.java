@@ -12,6 +12,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.DriveTrain;
 import frc.robot.subsystems.SwerveDrivetrain;
 
 public class CharecterizationSubsytem extends SubsystemBase {
@@ -46,14 +47,15 @@ public class CharecterizationSubsytem extends SubsystemBase {
     NetworkTableInstance.getDefault().setUpdateRate(0.010);
     drive = drivetrain;
 
+    //Use front modules to represent left and right sides
     rightEncoderPosition = ()
-    -> drive.getDriveEncoder(1).getPosition() * encoderConstant;
+    -> drive.getMK3(1).getDriveEncoder().getPosition() * encoderConstant;
     rightEncoderRate = ()
-    -> drive.getDriveEncoder(1).getVelocity() * encoderConstant / 60.;
+    -> drive.getMK3(1).getDriveEncoder().getVelocity() * encoderConstant / 60.;
     leftEncoderPosition = ()
-    -> drive.getDriveEncoder(0).getPosition() * encoderConstant;
+    -> drive.getMK3(0).getDriveEncoder().getPosition() * encoderConstant;
     leftEncoderRate = ()
-    -> drive.getDriveEncoder(0).getVelocity() * encoderConstant / 60.;
+    -> drive.getMK3(0).getDriveEncoder().getVelocity() * encoderConstant / 60.;
 
     // data processing step
     data = entries.toString();
@@ -82,14 +84,18 @@ public class CharecterizationSubsytem extends SubsystemBase {
     double leftMotorVolts = motorVolts;
     double rightMotorVolts = motorVolts;
 
-    // Retrieve the commanded speed from NetworkTables
+    // Retrieve the commanded speed from NetworkTables, should be between -1 and 1.
     double autospeed = autoSpeedEntry.getDouble(0);
     priorAutospeed = autospeed;
 
     // command motors to do things
-    drive.testDrive(autospeed,0);
-      //(rotateEntry.getBoolean(false) ? -1 : 1) * autospeed, autospeed,false);
-
+    if (rotateEntry.getBoolean(false)){
+      //convert autospeed to rad/s as a % of max angular speed
+      drive.drive(0, 0, autospeed*DriveTrain.kMaxAngularSpeed, false); //rotation only mode.  
+    } else {
+      //convert autospeed to ft/s as a % of max linear speed
+      drive.testDrive(autospeed*DriveTrain.kMaxSpeed ,0); //straight travel mode
+    }
 
     numberArray[0] = now;
     numberArray[1] = battery;

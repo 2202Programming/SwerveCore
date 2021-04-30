@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems;
 
-import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
@@ -110,9 +109,16 @@ public class SwerveDrivetrain extends SubsystemBase {
   }
 
 
-  // used for testing
+  /**
+   * Method to drive the robot using set speed/direction info.
+   * 
+   *  Length can be meter or ft, just be consistent in field and robot wheel units.
+   *
+   * @param speed Speed of the robot in the x direction (forward).  [length/s]
+   * @param angle Target angle of the robot.  [degrees]
+   */
   public void testDrive(double speed, double angle) { 
-    // output the angle and speed (meters per sec)  for each module
+    // output the angle and speed (ft per sec)  for each module
     for (int i = 0; i < modules.length; i++) {
       modules[i].setDesiredState(new SwerveModuleState(speed, new Rotation2d(Math.toRadians(angle))));
     }
@@ -138,12 +144,5 @@ public class SwerveDrivetrain extends SubsystemBase {
   public SwerveModuleMK3 getMK3(int modID) {
     if ((modID < 0) || (modID > modules.length -1))  return null;
     return modules[modID];
-  }
-
-  public CANEncoder getDriveEncoder(int side){ //1 for right, 0 for left
-    if (side == 0){
-      return modules[0].getDriveEncoder();
-    }
-    else return modules[1].getDriveEncoder();
   }
 }
