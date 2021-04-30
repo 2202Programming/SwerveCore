@@ -57,6 +57,9 @@ public class CharecterizationSubsytem extends SubsystemBase {
     leftEncoderRate = ()
     -> drive.getMK3(0).getDriveEncoder().getVelocity() * encoderConstant / 60.;
 
+    gyroAngleRadians = ()
+    -> Math.toRadians(drive.getGryoHeading());
+
     // data processing step
     data = entries.toString();
     data = data.substring(1, data.length() - 1) + ", ";

@@ -145,4 +145,11 @@ public class SwerveDrivetrain extends SubsystemBase {
     if ((modID < 0) || (modID > modules.length -1))  return null;
     return modules[modID];
   }
+
+    /**
+   * Method to return the gyro heading (in degrees)
+   */
+  public double getGryoHeading(){
+    return gyro.getAngle();
+  }
 }
