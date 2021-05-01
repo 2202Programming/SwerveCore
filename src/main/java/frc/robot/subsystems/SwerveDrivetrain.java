@@ -26,8 +26,8 @@ public class SwerveDrivetrain extends SubsystemBase {
    *  are adjusted by their use in the drive train.  
    */
   boolean kDriveMotorInvert_Right = true;
-  boolean kAngleMotorInvert_Right = true;
-  boolean kAngleCmdInvert_Right = true;
+  boolean kAngleMotorInvert_Right = false;
+  boolean kAngleCmdInvert_Right = false;
   boolean kDriveMotorInvert_Left = false;
   boolean kAngleMotorInvert_Left = false;
   boolean kAngleCmdInvert_Left = false;
