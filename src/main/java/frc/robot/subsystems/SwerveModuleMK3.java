@@ -125,9 +125,9 @@ String myprefix;
     driveMotor.burnFlash();
     
     //todo - do we still need the sleep with the re-order?
-    sleep(50);   //hack to allow absEncoder config to be delivered???
+    sleep(500);   //hack to allow absEncoder config to be delivered???
     calibrate();
-  }
+    }
 
   /**
    * This adjusts the absEncoder with the given offset to correct for CANCoder
@@ -158,6 +158,13 @@ String myprefix;
     // read absEncoder position, set internal angleEncoder to that value adjust for cmd inversion.
     double pos_deg = absEncoder.getAbsolutePosition();
     angleEncoder.setPosition(angleCmdInvert*pos_deg);   
+    sleep(500); //sparkmax gremlins
+    double temp=angleEncoder.getPosition();
+    sleep(500); //sparkmax gremlins
+    System.out.println("Mk3 Init - Ext angle:" + pos_deg + ", Internal:" + temp + ", Factor:" + angleEncoder.getPositionConversionFactor());
+    if (pos_deg != temp) {
+      System.out.println("*** ANGLE SAVE ERROR ***");
+    }
   }
 
 
