@@ -84,7 +84,7 @@ public class SwerveModuleMK3 {
 String myprefix;
 
   public SwerveModuleMK3(CANSparkMax driveMtr, CANSparkMax angleMtr, double offsetDegrees, CANCoder absEnc,
-      boolean invertAngleMtr, boolean invertAngleCmd, boolean invertDrive) {
+      boolean invertAngleMtr, boolean invertAngleCmd, boolean invertDrive, String prefix) {
     driveMotor = driveMtr;
     angleMotor = angleMtr;
     absEncoder = absEnc;
@@ -123,6 +123,15 @@ String myprefix;
     // burn the motor flash
     angleMotor.burnFlash();
     driveMotor.burnFlash();
+
+    /*setNTPrefix - causes the network table entries to be created 
+    *  and updated on the periodic() call.
+    * 
+    *  Use a short string to indicate which MK unit this is.
+    */
+    NTPrefix = "/MK3-" + prefix;
+    myprefix = prefix;
+    NTConfig();
     
     //todo - do we still need the sleep with the re-order?
     sleep(500);   //hack to allow absEncoder config to be delivered???
@@ -161,8 +170,8 @@ String myprefix;
     sleep(500); //sparkmax gremlins
     double temp=angleEncoder.getPosition();
     sleep(500); //sparkmax gremlins
-    System.out.println("Mk3 Init - Ext angle:" + pos_deg + ", Internal:" + temp + ", Factor:" + angleEncoder.getPositionConversionFactor());
-    if (pos_deg != temp) {
+    System.out.println(myprefix + " Init - Ext angle:" + pos_deg + ", Internal:" + temp + ", Factor:" + angleEncoder.getPositionConversionFactor());
+    if (Math.abs(pos_deg-temp) > 0.1) {
       System.out.println("*** ANGLE SAVE ERROR ***");
     }
   }
@@ -185,13 +194,14 @@ String myprefix;
    * 
    *  Use a short string to indicate which MK unit this is.
    * 
-   */
+   *
   public SwerveModuleMK3 setNTPrefix(String prefix) {
     NTPrefix = "/MK3-" + prefix;
     myprefix = prefix;
     NTConfig();
     return this;
   }
+*/
 
   public String getNTPrefix() { 
     return NTPrefix; 
