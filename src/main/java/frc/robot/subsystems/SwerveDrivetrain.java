@@ -6,6 +6,11 @@ package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
 
+import edu.wpi.first.hal.can.CANStatus;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
@@ -56,7 +61,11 @@ public class SwerveDrivetrain extends SubsystemBase {
   private final Gyro gyro;
   private final SwerveModuleMK3[] modules; 
 
-
+  private NetworkTable table;
+  private NetworkTableEntry can_utilization;
+  public final String NT_Name = "DT";  //expose data under DriveTrain table
+  private CANStatus can_status;
+  private int timer;
   public SwerveDrivetrain() {
     sensors = RobotContainer.RC().sensors;
     gyro = sensors;
@@ -79,7 +88,10 @@ public class SwerveDrivetrain extends SubsystemBase {
       new SwerveModuleMK3(new CANSparkMax(CAN.DT_BR_DRIVE, MT),  new CANSparkMax(CAN.DT_BR_ANGLE, MT), 
               DriveTrain.CC_BR_OFFSET, sensors.getCANCoder(EncoderID.BackRight),
               kAngleMotorInvert_Right, kAngleCmdInvert_Right, kDriveMotorInvert_Right,"BR")
-    };
+            };
+            table = NetworkTableInstance.getDefault().getTable(NT_Name);   
+            can_utilization = table.getEntry("/CanUtilization");   
+                
   }
 
   /**
@@ -123,6 +135,11 @@ public class SwerveDrivetrain extends SubsystemBase {
     //update data from each of the swerve drive modules.
     for (int i = 0; i < modules.length; i++) {
       modules[i].periodic();
+    }
+    timer++;
+    if (timer==25) {
+      can_utilization.setDouble(RobotController.getCANStatus().percentBusUtilization);
+      timer=0;
     }
   }
 
