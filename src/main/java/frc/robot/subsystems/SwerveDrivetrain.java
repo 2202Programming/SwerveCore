@@ -63,6 +63,10 @@ public class SwerveDrivetrain extends SubsystemBase {
 
   private NetworkTable table;
   private NetworkTableEntry can_utilization;
+  private NetworkTableEntry busOffCount;
+  private NetworkTableEntry receiveErrorCount;
+  private NetworkTableEntry transmitErrorCount;
+  private NetworkTableEntry txFullCount;
   public final String NT_Name = "DT";  //expose data under DriveTrain table
   private CANStatus can_status;
   private int timer;
@@ -89,8 +93,13 @@ public class SwerveDrivetrain extends SubsystemBase {
               DriveTrain.CC_BR_OFFSET, sensors.getCANCoder(EncoderID.BackRight),
               kAngleMotorInvert_Right, kAngleCmdInvert_Right, kDriveMotorInvert_Right,"BR")
             };
+            // for updating CAN status in periodic
             table = NetworkTableInstance.getDefault().getTable(NT_Name);   
             can_utilization = table.getEntry("/CanUtilization");   
+            busOffCount = table.getEntry("/CanBusOffCount");
+            receiveErrorCount = table.getEntry("/CanReceiveErrorCount");
+            transmitErrorCount = table.getEntry("/CanTransmitErrorCount");
+            txFullCount = table.getEntry("/CanTxError");
                 
   }
 
@@ -136,10 +145,16 @@ public class SwerveDrivetrain extends SubsystemBase {
     for (int i = 0; i < modules.length; i++) {
       modules[i].periodic();
     }
+        // updates CAN status data every 4 cycles
     timer++;
-    if (timer==25) {
-      can_utilization.setDouble(RobotController.getCANStatus().percentBusUtilization);
-      timer=0;
+    if (timer == 25) {
+      CANStatus canStatus = RobotController.getCANStatus();
+      can_utilization.setDouble(canStatus.percentBusUtilization);
+      busOffCount.setDouble(canStatus.busOffCount);
+      receiveErrorCount.setDouble(canStatus.receiveErrorCount);
+      transmitErrorCount.setDouble(canStatus.transmitErrorCount);
+      txFullCount.setDouble(canStatus.txFullCount);
+      timer = 0;
     }
   }
 
