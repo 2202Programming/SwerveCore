@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.CANCoderConfiguration;
 import com.revrobotics.CANEncoder;
+import com.revrobotics.CANError;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
@@ -121,8 +122,10 @@ String myprefix;
     DriveTrain.drivePIDF.copyTo(driveMotorPID, kSlot); // velocity mode
 
     // burn the motor flash
-    angleMotor.burnFlash();
-    driveMotor.burnFlash();
+    CANError angleError = angleMotor.burnFlash();
+    CANError driveError = driveMotor.burnFlash();
+    System.out.println(prefix + " angle error: " + angleError.value);
+    System.out.println(prefix + " drive error: " + driveError.value);
 
     /*setNTPrefix - causes the network table entries to be created 
     *  and updated on the periodic() call.
@@ -134,7 +137,7 @@ String myprefix;
     NTConfig();
     
     //todo - do we still need the sleep with the re-order?
-    sleep(500);   //hack to allow absEncoder config to be delivered???
+    sleep(50);   //hack to allow absEncoder config to be delivered???
     calibrate();
     }
 
@@ -167,9 +170,9 @@ String myprefix;
     // read absEncoder position, set internal angleEncoder to that value adjust for cmd inversion.
     double pos_deg = absEncoder.getAbsolutePosition();
     angleEncoder.setPosition(angleCmdInvert*pos_deg);   
-    sleep(500); //sparkmax gremlins
+    //sleep(500); //sparkmax gremlins
     double temp=angleEncoder.getPosition();
-    sleep(500); //sparkmax gremlins
+    //sleep(500); //sparkmax gremlins
     System.out.println(myprefix + " Init - Ext angle:" + pos_deg + ", Internal:" + temp + ", Factor:" + angleEncoder.getPositionConversionFactor());
     if (Math.abs(pos_deg-temp) > 0.1) {
       System.out.println("*** ANGLE SAVE ERROR ***");
