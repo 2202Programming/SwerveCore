@@ -22,6 +22,7 @@ import frc.robot.Constants.CAN;
 import frc.robot.Constants.DriveTrain;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Sensors_Subsystem.EncoderID;
+import frc.robot.subsystems.util.DeviceFinder;
 
 public class SwerveDrivetrain extends SubsystemBase {
   /**
@@ -74,6 +75,8 @@ public class SwerveDrivetrain extends SubsystemBase {
     sensors = RobotContainer.RC().sensors;
     gyro = sensors;
     
+    System.out.println("***CAN devices: " + new DeviceFinder().Find());
+
     var MT = CANSparkMax.MotorType.kBrushless;
     modules = new SwerveModuleMK3[] {
       // Front Left
@@ -92,14 +95,15 @@ public class SwerveDrivetrain extends SubsystemBase {
       new SwerveModuleMK3(new CANSparkMax(CAN.DT_BR_DRIVE, MT),  new CANSparkMax(CAN.DT_BR_ANGLE, MT), 
               DriveTrain.CC_BR_OFFSET, sensors.getCANCoder(EncoderID.BackRight),
               kAngleMotorInvert_Right, kAngleCmdInvert_Right, kDriveMotorInvert_Right,"BR")
-            };
-            // for updating CAN status in periodic
-            table = NetworkTableInstance.getDefault().getTable(NT_Name);   
-            can_utilization = table.getEntry("/CanUtilization");   
-            busOffCount = table.getEntry("/CanBusOffCount");
-            receiveErrorCount = table.getEntry("/CanReceiveErrorCount");
-            transmitErrorCount = table.getEntry("/CanTransmitErrorCount");
-            txFullCount = table.getEntry("/CanTxError");
+    };
+
+    // for updating CAN status in periodic
+    table = NetworkTableInstance.getDefault().getTable(NT_Name);   
+    can_utilization = table.getEntry("/CanUtilization");   
+    busOffCount = table.getEntry("/CanBusOffCount");
+    receiveErrorCount = table.getEntry("/CanReceiveErrorCount");
+    transmitErrorCount = table.getEntry("/CanTransmitErrorCount");
+    txFullCount = table.getEntry("/CanTxError");
                 
   }
 
