@@ -25,10 +25,11 @@ import frc.robot.subsystems.Sensors_Subsystem.EncoderID;
 
 public class SwerveDrivetrain extends SubsystemBase {
   /**
-   * Inversions account for rotations of the module relative to left or right side of robot.
+   * Inversions account for rotations of the module relative to left or right side
+   * of robot.
    * 
-   *  CANCoders are setup in Sensors and will have CCW= positve convention. Their offsets
-   *  are adjusted by their use in the drive train.  
+   * CANCoders are setup in Sensors and will have CCW= positve convention. Their
+   * offsets are adjusted by their use in the drive train.
    */
   boolean kDriveMotorInvert_Right = true;
   boolean kAngleMotorInvert_Right = false;
@@ -38,28 +39,23 @@ public class SwerveDrivetrain extends SubsystemBase {
   boolean kAngleCmdInvert_Left = false;
   /**
    *
-   * Modules are in the order of -
-   *   Front Left
-   *   Front Right
-   *   Back Left
-   *   Back Right
+   * Modules are in the order of - Front Left Front Right Back Left Back Right
    * 
-   * Positive x values represent moving toward the front of the robot
-   * Positive y values represent moving toward the left of the robot
-   * All lengths in feet.
+   * Positive x values represent moving toward the front of the robot Positive y
+   * values represent moving toward the left of the robot All lengths in feet.
    * https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/swerve-drive-kinematics.html#constructing-the-kinematics-object
    */
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
-    new Translation2d(DriveTrain.XwheelOffset, DriveTrain.YwheelOffset),   // Front Left
-    new Translation2d(DriveTrain.XwheelOffset, -DriveTrain.YwheelOffset),  // Front Right
-    new Translation2d(-DriveTrain.XwheelOffset, DriveTrain.YwheelOffset),  // Back Left
-    new Translation2d(-DriveTrain.XwheelOffset, -DriveTrain.YwheelOffset)  // Back Right
+      new Translation2d(DriveTrain.XwheelOffset, DriveTrain.YwheelOffset), // Front Left
+      new Translation2d(DriveTrain.XwheelOffset, -DriveTrain.YwheelOffset), // Front Right
+      new Translation2d(-DriveTrain.XwheelOffset, DriveTrain.YwheelOffset), // Back Left
+      new Translation2d(-DriveTrain.XwheelOffset, -DriveTrain.YwheelOffset) // Back Right
   );
 
   // sensors and our mk3 modules
   private final Sensors_Subsystem sensors;
   private final Gyro gyro;
-  private final SwerveModuleMK3[] modules; 
+  private final SwerveModuleMK3[] modules;
 
   private NetworkTable table;
   private NetworkTableEntry can_utilization;
@@ -67,87 +63,86 @@ public class SwerveDrivetrain extends SubsystemBase {
   private NetworkTableEntry receiveErrorCount;
   private NetworkTableEntry transmitErrorCount;
   private NetworkTableEntry txFullCount;
-  public final String NT_Name = "DT";  //expose data under DriveTrain table
+  public final String NT_Name = "DT"; // expose data under DriveTrain table
   private CANStatus can_status;
   private int timer;
+
   public SwerveDrivetrain() {
     sensors = RobotContainer.RC().sensors;
     gyro = sensors;
-    
+
     var MT = CANSparkMax.MotorType.kBrushless;
     modules = new SwerveModuleMK3[] {
-      // Front Left
-      new SwerveModuleMK3(new CANSparkMax(CAN.DT_FL_DRIVE, MT),  new CANSparkMax(CAN.DT_FL_ANGLE, MT), 
-              DriveTrain.CC_FL_OFFSET, sensors.getCANCoder(EncoderID.FrontLeft), 
-              kAngleMotorInvert_Left, kAngleCmdInvert_Left, kDriveMotorInvert_Left,"FL"),
-      // Front Right
-      new SwerveModuleMK3(new CANSparkMax(CAN.DT_FR_DRIVE, MT),  new CANSparkMax(CAN.DT_FR_ANGLE, MT), 
-              DriveTrain.CC_FR_OFFSET, sensors.getCANCoder(EncoderID.FrontRight), 
-              kAngleMotorInvert_Right, kAngleCmdInvert_Right, kDriveMotorInvert_Right,"FR"), 
-      // Back Left                    
-      new SwerveModuleMK3(new CANSparkMax(CAN.DT_BL_DRIVE, MT),  new CANSparkMax(CAN.DT_BL_ANGLE, MT), 
-              DriveTrain.CC_BL_OFFSET,  sensors.getCANCoder(EncoderID.BackLeft), 
-              kAngleMotorInvert_Left, kAngleCmdInvert_Left, kDriveMotorInvert_Left,"BL"),
-      // Back Right
-      new SwerveModuleMK3(new CANSparkMax(CAN.DT_BR_DRIVE, MT),  new CANSparkMax(CAN.DT_BR_ANGLE, MT), 
-              DriveTrain.CC_BR_OFFSET, sensors.getCANCoder(EncoderID.BackRight),
-              kAngleMotorInvert_Right, kAngleCmdInvert_Right, kDriveMotorInvert_Right,"BR")
-            };
-            // for updating CAN status in periodic
-            table = NetworkTableInstance.getDefault().getTable(NT_Name);   
-            can_utilization = table.getEntry("/CanUtilization");   
-            busOffCount = table.getEntry("/CanBusOffCount");
-            receiveErrorCount = table.getEntry("/CanReceiveErrorCount");
-            transmitErrorCount = table.getEntry("/CanTransmitErrorCount");
-            txFullCount = table.getEntry("/CanTxError");
-                
+        // Front Left
+        new SwerveModuleMK3(new CANSparkMax(CAN.DT_FL_DRIVE, MT), new CANSparkMax(CAN.DT_FL_ANGLE, MT),
+            DriveTrain.CC_FL_OFFSET, sensors.getCANCoder(EncoderID.FrontLeft), kAngleMotorInvert_Left,
+            kAngleCmdInvert_Left, kDriveMotorInvert_Left, "FL"),
+        // Front Right
+        new SwerveModuleMK3(new CANSparkMax(CAN.DT_FR_DRIVE, MT), new CANSparkMax(CAN.DT_FR_ANGLE, MT),
+            DriveTrain.CC_FR_OFFSET, sensors.getCANCoder(EncoderID.FrontRight), kAngleMotorInvert_Right,
+            kAngleCmdInvert_Right, kDriveMotorInvert_Right, "FR"),
+        // Back Left
+        new SwerveModuleMK3(new CANSparkMax(CAN.DT_BL_DRIVE, MT), new CANSparkMax(CAN.DT_BL_ANGLE, MT),
+            DriveTrain.CC_BL_OFFSET, sensors.getCANCoder(EncoderID.BackLeft), kAngleMotorInvert_Left,
+            kAngleCmdInvert_Left, kDriveMotorInvert_Left, "BL"),
+        // Back Right
+        new SwerveModuleMK3(new CANSparkMax(CAN.DT_BR_DRIVE, MT), new CANSparkMax(CAN.DT_BR_ANGLE, MT),
+            DriveTrain.CC_BR_OFFSET, sensors.getCANCoder(EncoderID.BackRight), kAngleMotorInvert_Right,
+            kAngleCmdInvert_Right, kDriveMotorInvert_Right, "BR") };
+    // for updating CAN status in periodic
+    table = NetworkTableInstance.getDefault().getTable(NT_Name);
+    can_utilization = table.getEntry("/CanUtilization");
+    busOffCount = table.getEntry("/CanBusOffCount");
+    receiveErrorCount = table.getEntry("/CanReceiveErrorCount");
+    transmitErrorCount = table.getEntry("/CanTransmitErrorCount");
+    txFullCount = table.getEntry("/CanTxError");
+
   }
 
   /**
    * Method to drive the robot using joystick info.
    * 
-   *  Length can be meter or ft, just be consistent in field and robot wheel units.
+   * Length can be meter or ft, just be consistent in field and robot wheel units.
    *
-   * @param xSpeed Speed of the robot in the x direction (forward).  [length/s]
-   * @param ySpeed Speed of the robot in the y direction (sideways). [length/s]
-   * @param rot Angular rate of the robot.  [rad/s]
-   * @param fieldRelative Whether the provided x and y speeds are relative to the field.
+   * @param xSpeed        Speed of the robot in the x direction (forward).
+   *                      [length/s]
+   * @param ySpeed        Speed of the robot in the y direction (sideways).
+   *                      [length/s]
+   * @param rot           Angular rate of the robot. [rad/s]
+   * @param fieldRelative Whether the provided x and y speeds are relative to the
+   *                      field.
    */
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
-    SwerveModuleState[] states =
-      kinematics.toSwerveModuleStates(
-        fieldRelative
-          ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d())
-          : new ChassisSpeeds(xSpeed, ySpeed, rot));
+    SwerveModuleState[] states = kinematics.toSwerveModuleStates(
+        fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d())
+            : new ChassisSpeeds(xSpeed, ySpeed, rot));
 
     // fix speeds if kinematics exceed what the robot can actually do [lenght/s]
     SwerveDriveKinematics.normalizeWheelSpeeds(states, DriveTrain.kMaxSpeed);
-    
+
     // output the angle and velocity for each module
     for (int i = 0; i < states.length; i++) {
       modules[i].setDesiredState(states[i]);
     }
   }
 
-
   // used for testing
-  public void testDrive(double speed, double angle) { 
-    // output the angle and speed (meters per sec)  for each module
+  public void testDrive(double speed, double angle) {
+    // output the angle and speed (meters per sec) for each module
     for (int i = 0; i < modules.length; i++) {
       modules[i].setDesiredState(new SwerveModuleState(speed, new Rotation2d(Math.toRadians(angle))));
     }
   }
 
-
   @Override
   public void periodic() {
-    //update data from each of the swerve drive modules.
+    // update data from each of the swerve drive modules.
     for (int i = 0; i < modules.length; i++) {
       modules[i].periodic();
     }
-        // updates CAN status data every 4 cycles
+    // updates CAN status data every 4 cycles
     timer++;
-    if (timer == 25) {
+    if (timer == 5) {
       CANStatus canStatus = RobotController.getCANStatus();
       can_utilization.setDouble(canStatus.percentBusUtilization);
       busOffCount.setDouble(canStatus.busOffCount);
@@ -160,14 +155,15 @@ public class SwerveDrivetrain extends SubsystemBase {
 
   @Override
   public void simulationPeriodic() {
-    //  any sim work for each module
+    // any sim work for each module
     for (int i = 0; i < modules.length; i++) {
-     // modules[i].periodic();
+      // modules[i].periodic();
     }
   }
 
   public SwerveModuleMK3 getMK3(int modID) {
-    if ((modID < 0) || (modID > modules.length -1))  return null;
+    if ((modID < 0) || (modID > modules.length - 1))
+      return null;
     return modules[modID];
   }
 }

@@ -17,23 +17,22 @@ import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import frc.robot.Constants.DriveTrain;
 import frc.robot.util.ModMath;
 
-
 public class SwerveModuleMK3 {
-  public final String NT_Name = "DT";  //expose data under DriveTrain table
+  public final String NT_Name = "DT"; // expose data under DriveTrain table
 
-  // Hardware PID settings in Constants.DriveTrain PIDFController 
+  // Hardware PID settings in Constants.DriveTrain PIDFController
   // PID slot for angle and drive pid on SmartMax controller
-  final int kSlot = 0;    
+  final int kSlot = 0;
 
   // Rev devices
   private final CANSparkMax driveMotor;
   private final CANSparkMax angleMotor;
   private final CANPIDController driveMotorPID;
   private final CANPIDController angleMotorPID; // sparkmax PID can only use internal NEO encoders
-  private final CANEncoder  angleEncoder;       // aka internalAngle
-  private final CANEncoder  driveEncoder;
-  //CTRE devices
-  private final CANCoder absEncoder;            // aka externalAngle (external to Neo/Smartmax)
+  private final CANEncoder angleEncoder; // aka internalAngle
+  private final CANEncoder driveEncoder;
+  // CTRE devices
+  private final CANCoder absEncoder; // aka externalAngle (external to Neo/Smartmax)
   private double angleCmdInvert;
 
   /**
@@ -51,38 +50,39 @@ public class SwerveModuleMK3 {
   // NetworkTables
   String NTPrefix;
 
-  // measurements made every period - public so they can be pulled for network tables...
-  double m_internalAngle;    // measured Neo unbounded [deg]
-  double m_externalAngle;    // measured CANCoder bounded +/-180 [deg]
-  double m_velocity;         // measured velocity [ft/s]
-  double m_angle_target;     // desired angle unbounded [deg]
-  double m_vel_target;       // desired velocity [ft/s]
+  // measurements made every period - public so they can be pulled for network
+  // tables...
+  double m_internalAngle; // measured Neo unbounded [deg]
+  double m_externalAngle; // measured CANCoder bounded +/-180 [deg]
+  double m_velocity; // measured velocity [ft/s]
+  double m_angle_target; // desired angle unbounded [deg]
+  double m_vel_target; // desired velocity [ft/s]
 
   /**
-   * SwerveModuleMK3 - 
+   * SwerveModuleMK3 -
    * 
-   *  SmartMax controllers used for angle and velocity motors. 
+   * SmartMax controllers used for angle and velocity motors.
    * 
-   *  SmartMax Velocity mode is used to close the velocity loop.  Units will match the units of the
-   *  drive-wheel-diameter.  [ft/s]
-   *  
-   *  Angle in degrees is controlled using position mode on the SmartMax. The angle positon is not constrainted to
-   *  +/- 180 degrees because the Neo has 32bit float resolution, so we can just let the postion grow or shrink
-   *  based on the how many degrees we need to change.  We could rotate 1000's of time without going
-   *  past the resolution of the SmartMax's position tracking.  [deg]
-   *  
-   *  Example: 
-   *    cmd_angle = 175 ==> 175 + (n * 360) where  -Turns < n < Turns
-   *              ==> ... -545 ==  -185 == 175 == 535 == 895 ...
-   *  
-   *  Minimum number of turns in one direction before we would have to consider overflow:
-   *    Turns = posBitResolution / encoder-counts
-   *    Turns = 2^23 / (42*12.8)  = 15,603            
+   * SmartMax Velocity mode is used to close the velocity loop. Units will match
+   * the units of the drive-wheel-diameter. [ft/s]
    * 
-   *  Batteries will need changing before then.
+   * Angle in degrees is controlled using position mode on the SmartMax. The angle
+   * positon is not constrainted to +/- 180 degrees because the Neo has 32bit
+   * float resolution, so we can just let the postion grow or shrink based on the
+   * how many degrees we need to change. We could rotate 1000's of time without
+   * going past the resolution of the SmartMax's position tracking. [deg]
+   * 
+   * Example: cmd_angle = 175 ==> 175 + (n * 360) where -Turns < n < Turns ==> ...
+   * -545 == -185 == 175 == 535 == 895 ...
+   * 
+   * Minimum number of turns in one direction before we would have to consider
+   * overflow: Turns = posBitResolution / encoder-counts Turns = 2^23 / (42*12.8)
+   * = 15,603
+   * 
+   * Batteries will need changing before then.
    * 
    */
-String myprefix;
+  String myprefix;
 
   public SwerveModuleMK3(CANSparkMax driveMtr, CANSparkMax angleMtr, double offsetDegrees, CANCoder absEnc,
       boolean invertAngleMtr, boolean invertAngleCmd, boolean invertDrive, String prefix) {
@@ -105,7 +105,9 @@ String myprefix;
     driveEncoder = driveMotor.getEncoder();
     // set driveEncoder to use ft/s
     driveEncoder.setPositionConversionFactor(Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR); // mo-rot to ft
-    driveEncoder.setVelocityConversionFactor(Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR / 60.0); // mo-rpm to ft/s
+    driveEncoder.setVelocityConversionFactor(Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR / 60.0); // mo-rpm
+                                                                                                               // to
+                                                                                                               // ft/s
 
     // Angle Motor config
     angleMotor.setInverted(invertAngleMtr);
@@ -124,35 +126,51 @@ String myprefix;
     // burn the motor flash
     CANError angleError = angleMotor.burnFlash();
     CANError driveError = driveMotor.burnFlash();
-    System.out.println(prefix + " angle error: " + angleError.value);
-    System.out.println(prefix + " drive error: " + driveError.value);
+    int counter = 0;
+    while (angleError.value != 0) {
+      System.out.println(prefix + " angle error: " + angleError.value);
+      counter++;
+      if (counter > 20)
+        break;
+      sleep(500);
+    }
+    counter = 0;
+    while (driveError.value != 0) {
+      System.out.println(prefix + " drive error: " + driveError.value);
+      counter++;
+      if (counter > 20)
+        break;
+      sleep(500);
+    }
 
-    /*setNTPrefix - causes the network table entries to be created 
-    *  and updated on the periodic() call.
-    * 
-    *  Use a short string to indicate which MK unit this is.
-    */
+    /*
+     * setNTPrefix - causes the network table entries to be created and updated on
+     * the periodic() call.
+     * 
+     * Use a short string to indicate which MK unit this is.
+     */
     NTPrefix = "/MK3-" + prefix;
     myprefix = prefix;
     NTConfig();
-    
-    //todo - do we still need the sleep with the re-order?
-    sleep(50);   //hack to allow absEncoder config to be delivered???
+
+    // todo - do we still need the sleep with the re-order?
+    sleep(100); // hack to allow absEncoder config to be delivered???
     calibrate();
-    }
+  }
 
   /**
    * This adjusts the absEncoder with the given offset to correct for CANCoder
    * mounting position. This value should be persistent accross power cycles.
    * 
-   * Warning, we had to sleep afer setting configs before the absolute
-   * position could be read in calibrate.
+   * Warning, we had to sleep afer setting configs before the absolute position
+   * could be read in calibrate.
+   * 
    * @param offsetDegrees
    */
   void setMagOffset(double offsetDegrees) {
     // adjust magnetic offset in absEncoder, measured constants.
     absEncoderConfiguration = new CANCoderConfiguration();
-    absEncoder.getAllConfigs(absEncoderConfiguration); 
+    absEncoder.getAllConfigs(absEncoderConfiguration);
     // if different, update
     if (offsetDegrees != absEncoderConfiguration.magnetOffsetDegrees) {
       absEncoderConfiguration.magnetOffsetDegrees = offsetDegrees;
@@ -160,59 +178,71 @@ String myprefix;
     }
   }
 
-   
   /**
-   *  calibrate() - aligns Neo internal position with absolute encoder.
-   *    This needs to be done at power up, or when the unbounded encoder gets
-   *    close to its overflow point.
+   * calibrate() - aligns Neo internal position with absolute encoder. This needs
+   * to be done at power up, or when the unbounded encoder gets close to its
+   * overflow point.
    */
   void calibrate() {
-    // read absEncoder position, set internal angleEncoder to that value adjust for cmd inversion.
+    // read absEncoder position, set internal angleEncoder to that value adjust for
+    // cmd inversion.
     double pos_deg = absEncoder.getAbsolutePosition();
-    angleEncoder.setPosition(angleCmdInvert*pos_deg);   
-    //sleep(500); //sparkmax gremlins
-    double temp=angleEncoder.getPosition();
-    //sleep(500); //sparkmax gremlins
-    System.out.println(myprefix + " Init - Ext angle:" + pos_deg + ", Internal:" + temp + ", Factor:" + angleEncoder.getPositionConversionFactor());
-    if (Math.abs(pos_deg-temp) > 0.1) {
+    angleEncoder.setPosition(angleCmdInvert * pos_deg);
+    sleep(100); // sparkmax gremlins
+    double temp = angleEncoder.getPosition();
+    sleep(100); // sparkmax gremlins
+    System.out.println(myprefix + " Init - Ext angle:" + pos_deg + ", Internal:" + temp + ", Factor:"
+        + angleEncoder.getPositionConversionFactor());
+
+    if (driveEncoder.getPositionConversionFactor() != Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR) {
+      System.out.println(myprefix + " position conversion factor incorrect for drive");
+    }
+    if (driveEncoder.getVelocityConversionFactor() != Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR / 60.0) {
+      System.out.println(myprefix + " velocity conversion factor incorrect for drive");
+    }
+    if (angleEncoder.getPositionConversionFactor() != 360.0 / DriveTrain.kSteeringGR) {
+      System.out.println(myprefix + " position conversion factor incorrect for angle");
+    }
+    if (angleEncoder.getVelocityConversionFactor() != (360.0 / DriveTrain.kSteeringGR) / 60) {
+      System.out.println(myprefix + " velocity conversion factor incorrect for angle");
+    }
+    if (Math.abs(pos_deg - temp) > 0.1) {
       System.out.println("*** ANGLE SAVE ERROR ***");
     }
   }
 
-
-  // _set<>  for testing during bring up.
+  // _set<> for testing during bring up.
   public void _setInvertAngleCmd(boolean invert) {
     angleCmdInvert = (invert) ? -1.0 : 1.0;
     calibrate();
   }
+
   public void _setInvertAngleMotor(boolean invert) {
     angleMotor.setInverted(invert);
   }
+
   public void _setInvertDriveMotor(boolean invert) {
     driveMotor.setInverted(invert);
   }
+
   /**
-   *  setNTPrefix - causes the network table entries to be created 
-   *  and updated on the periodic() call.
+   * setNTPrefix - causes the network table entries to be created and updated on
+   * the periodic() call.
    * 
-   *  Use a short string to indicate which MK unit this is.
+   * Use a short string to indicate which MK unit this is.
    * 
    *
-  public SwerveModuleMK3 setNTPrefix(String prefix) {
-    NTPrefix = "/MK3-" + prefix;
-    myprefix = prefix;
-    NTConfig();
-    return this;
-  }
-*/
+   * public SwerveModuleMK3 setNTPrefix(String prefix) { NTPrefix = "/MK3-" +
+   * prefix; myprefix = prefix; NTConfig(); return this; }
+   */
 
-  public String getNTPrefix() { 
-    return NTPrefix; 
+  public String getNTPrefix() {
+    return NTPrefix;
   }
 
   public void periodic() {
-    //measure everything at same time
-    m_internalAngle = angleEncoder.getPosition()*angleCmdInvert;
+    // measure everything at same time
+    m_internalAngle = angleEncoder.getPosition() * angleCmdInvert;
     m_externalAngle = absEncoder.getAbsolutePosition();
     m_velocity = driveEncoder.getVelocity();
 
@@ -226,16 +256,16 @@ String myprefix;
    * @return SmartMax/Neo internal angle (degrees)
    */
   public Rotation2d getAngleRot2d() {
-    return Rotation2d.fromDegrees(m_internalAngle); 
+    return Rotation2d.fromDegrees(m_internalAngle);
   }
+
   public double getAngle() {
     return m_internalAngle;
   }
 
-
   /**
-   * External Angle is external to the SmartMax/Neo and is the absolute 
-   * angle encoder. 
+   * External Angle is external to the SmartMax/Neo and is the absolute angle
+   * encoder.
    * 
    * At power-up, this angle is used to calibrate the SmartMax PID controller.
    * 
@@ -243,6 +273,7 @@ String myprefix;
   public Rotation2d getAngleExternalRot2d() {
     return Rotation2d.fromDegrees(m_externalAngle);
   }
+
   public double getAngleExternal() {
     return m_externalAngle;
   }
@@ -262,26 +293,30 @@ String myprefix;
    *                     of the module
    */
   public void setDesiredState(SwerveModuleState desiredState) {
-    SwerveModuleState state = desiredState;  //SwerveModuleState.optimize(desiredState, Rotation2d.fromDegrees(m_internalAngle));
-   // use position control on angle with INTERNAL encoder, scaled internally for degrees
+    SwerveModuleState state = desiredState; // SwerveModuleState.optimize(desiredState,
+                                            // Rotation2d.fromDegrees(m_internalAngle));
+    // use position control on angle with INTERNAL encoder, scaled internally for
+    // degrees
     m_angle_target = state.angle.getDegrees();
 
     // figure out how far we need to move, target - current, bounded +/-180
     double delta = ModMath.delta360(m_angle_target, m_internalAngle);
     // if we aren't moving, keep the wheels pointed where they are
-    if (Math.abs(state.speedMetersPerSecond) < .01 ) delta = 0;
+    if (Math.abs(state.speedMetersPerSecond) < .01)
+      delta = 0;
 
     // now add that delta to unbounded Neo angle, m_internal isn't range bound
-    angleMotorPID.setReference(angleCmdInvert*(m_internalAngle + delta), ControlType.kPosition);
-    
+    angleMotorPID.setReference(angleCmdInvert * (m_internalAngle + delta), ControlType.kPosition);
+
     // use velocity control, in ft/s (ignore variable name)
-    driveMotorPID.setReference(state.speedMetersPerSecond, ControlType.kVelocity); 
+    driveMotorPID.setReference(state.speedMetersPerSecond, ControlType.kVelocity);
   }
 
   /**
-   * Network Tables data 
+   * Network Tables data
    * 
-   * If a prefix is given for the module, NT entries will be created and updated on the periodic() call.
+   * If a prefix is given for the module, NT entries will be created and updated
+   * on the periodic() call.
    * 
    */
   private NetworkTable table;
@@ -295,16 +330,16 @@ String myprefix;
     // direct networktables logging
     table = NetworkTableInstance.getDefault().getTable(NT_Name);
     nte_angle = table.getEntry(NTPrefix + "/angle");
-    nte_external_angle = table.getEntry(NTPrefix +"/angle_ext");
+    nte_external_angle = table.getEntry(NTPrefix + "/angle_ext");
     nte_velocity = table.getEntry(NTPrefix + "/velocity");
     nte_angle_target = table.getEntry(NTPrefix + "/angle_target");
     nte_vel_target = table.getEntry(NTPrefix + "/velocity_target");
-    
 
   }
 
   void NTUpdate() {
-    if (table == null) return;                   // not initialized, punt
+    if (table == null)
+      return; // not initialized, punt
     nte_angle.setDouble(m_internalAngle);
     nte_external_angle.setDouble(m_externalAngle);
     nte_velocity.setDouble(m_velocity);
@@ -312,10 +347,11 @@ String myprefix;
     nte_vel_target.setDouble(m_vel_target);
   }
 
-  void sleep( long ms) {
+  void sleep(long ms) {
     try {
       Thread.sleep(ms);
-    } catch (Exception e) { }
+    } catch (Exception e) {
+    }
   }
 
 }
