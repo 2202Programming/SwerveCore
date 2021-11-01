@@ -125,22 +125,30 @@ public class SwerveModuleMK3 {
 
     // burn the motor flash
     CANError angleError = angleMotor.burnFlash();
-    CANError driveError = driveMotor.burnFlash();
+    sleep(100);
+
     int counter = 0;
     while (angleError.value != 0) {
       System.out.println(prefix + " angle error: " + angleError.value);
       counter++;
-      if (counter > 20)
+      if (counter > 20) {
+        System.out.println("*** ERROR *** " + prefix + " Angle Motor Flash Failed.");
         break;
-      sleep(500);
+      }
+      sleep(100);
     }
+
+    CANError driveError = driveMotor.burnFlash();
+    sleep(100);
     counter = 0;
     while (driveError.value != 0) {
       System.out.println(prefix + " drive error: " + driveError.value);
       counter++;
-      if (counter > 20)
+      if (counter > 20) {
+        System.out.println("*** ERROR *** " + prefix + " Drive Motor Flash Failed.");
         break;
-      sleep(500);
+      }
+      sleep(100);
     }
 
     /*
@@ -153,8 +161,6 @@ public class SwerveModuleMK3 {
     myprefix = prefix;
     NTConfig();
 
-    // todo - do we still need the sleep with the re-order?
-    sleep(100); // hack to allow absEncoder config to be delivered???
     calibrate();
   }
 
@@ -191,24 +197,45 @@ public class SwerveModuleMK3 {
     sleep(100); // sparkmax gremlins
     double temp = angleEncoder.getPosition();
     sleep(100); // sparkmax gremlins
+
     System.out.println(myprefix + " Init - Ext angle:" + pos_deg + ", Internal:" + temp + ", Factor:"
         + angleEncoder.getPositionConversionFactor());
+    
+    int counter = 0;
+    while(!realityCheckSparkMax(pos_deg, temp)){
+      counter++;
+      if(counter > 20) {
+        System.out.println("*** " + myprefix + " reality check failed ***");
+        break;
+      }
+      sleep(100);
+    }
 
+  }
+
+  boolean realityCheckSparkMax(double angle_cancoder, double internal_angle) {
+    boolean result = true;
     if (driveEncoder.getPositionConversionFactor() != Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR) {
-      System.out.println(myprefix + " position conversion factor incorrect for drive");
+      System.out.println("*** ERROR *** " + myprefix + " position conversion factor incorrect for drive");
+      result = false;
     }
     if (driveEncoder.getVelocityConversionFactor() != Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR / 60.0) {
-      System.out.println(myprefix + " velocity conversion factor incorrect for drive");
+      System.out.println("*** ERROR *** " + myprefix + " velocity conversion factor incorrect for drive");
+      result = false;
     }
     if (angleEncoder.getPositionConversionFactor() != 360.0 / DriveTrain.kSteeringGR) {
-      System.out.println(myprefix + " position conversion factor incorrect for angle");
+      System.out.println("*** ERROR *** " + myprefix + " position conversion factor incorrect for angle");
+      result = false;
     }
     if (angleEncoder.getVelocityConversionFactor() != (360.0 / DriveTrain.kSteeringGR) / 60) {
-      System.out.println(myprefix + " velocity conversion factor incorrect for angle");
+      System.out.println("*** ERROR *** " + myprefix + " velocity conversion factor incorrect for angle");
+      result = false;
     }
-    if (Math.abs(pos_deg - temp) > 0.1) {
-      System.out.println("*** ANGLE SAVE ERROR ***");
+    if (Math.abs(angle_cancoder - internal_angle) > 0.1) {
+      System.out.println("*** ERROR *** " + myprefix + " angle encoder save error");
+      result = false;
     }
+    return result;
   }
 
   // _set<> for testing during bring up.
