@@ -24,6 +24,8 @@ public class SwerveModuleMK3 {
   // PID slot for angle and drive pid on SmartMax controller
   final int kSlot = 0;
 
+  private int frameCounter = 0;
+
   // Rev devices
   private final CANSparkMax driveMotor;
   private final CANSparkMax angleMotor;
@@ -268,12 +270,16 @@ public class SwerveModuleMK3 {
   }
 
   public void periodic() {
-    // measure everything at same time
+    // measure everything at same time; these get updated every cycle
     m_internalAngle = angleEncoder.getPosition() * angleCmdInvert;
-    m_externalAngle = absEncoder.getAbsolutePosition();
     m_velocity = driveEncoder.getVelocity();
 
-    NTUpdate();
+    //these are for human consumption, update slower
+    if (frameCounter++ == 10) {
+      m_externalAngle = absEncoder.getAbsolutePosition();
+      NTUpdate();
+      frameCounter = 0;
+    }
   }
 
   /**
