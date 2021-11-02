@@ -200,14 +200,23 @@ public class SwerveModuleMK3 {
     double temp = angleEncoder.getPosition();
     sleep(100); // sparkmax gremlins
 
-    System.out.println(myprefix + " Init - Ext angle:" + pos_deg + ", Internal:" + temp + ", Factor:"
-        + angleEncoder.getPositionConversionFactor());
-    
     int counter = 0;
+    while(Math.abs(pos_deg - temp) > 0.1) {  //keep trying to set encoder angle if it's not matching
+      angleEncoder.setPosition(angleCmdInvert * pos_deg);
+      sleep(100); // sparkmax gremlins
+      temp = angleEncoder.getPosition();
+      sleep(100); // sparkmax gremlins
+      if (counter++ > 20){
+        System.out.println("*** Angle position set failed after 20 tries ***");
+        break;
+      }
+    }
+    
+    counter = 0;
     while(!realityCheckSparkMax(pos_deg, temp)){
       counter++;
       if(counter > 20) {
-        System.out.println("*** " + myprefix + " reality check failed ***");
+        System.out.println("*** " + myprefix + " reality check failed over 20 tries ***");
         break;
       }
       sleep(100);
