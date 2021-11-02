@@ -127,7 +127,7 @@ public class SwerveModuleMK3 {
 
     // burn the motor flash
     CANError angleError = angleMotor.burnFlash();
-    sleep(100);
+    sleep(2000); //takes 1 sec to burn per Dean
 
     int counter = 0;
     while (angleError.value != 0) {
@@ -141,7 +141,7 @@ public class SwerveModuleMK3 {
     }
 
     CANError driveError = driveMotor.burnFlash();
-    sleep(100);
+    sleep(2000); //takes 1 sec to burn per Dean
     counter = 0;
     while (driveError.value != 0) {
       System.out.println(prefix + " drive error: " + driveError.value);
