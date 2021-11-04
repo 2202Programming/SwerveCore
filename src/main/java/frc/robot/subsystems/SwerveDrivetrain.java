@@ -63,9 +63,12 @@ public class SwerveDrivetrain extends SubsystemBase {
   private NetworkTableEntry receiveErrorCount;
   private NetworkTableEntry transmitErrorCount;
   private NetworkTableEntry txFullCount;
+  private NetworkTableEntry fieldMode;
+
   public final String NT_Name = "DT"; // expose data under DriveTrain table
-  private CANStatus can_status;
   private int timer;
+
+  private boolean fieldRelativeMode = false;
 
   public SwerveDrivetrain() {
     sensors = RobotContainer.RC().sensors;
@@ -96,6 +99,8 @@ public class SwerveDrivetrain extends SubsystemBase {
     receiveErrorCount = table.getEntry("/CanReceiveErrorCount");
     transmitErrorCount = table.getEntry("/CanTransmitErrorCount");
     txFullCount = table.getEntry("/CanTxError");
+    fieldMode = table.getEntry("/FieldRealitveMode");
+    fieldMode.setBoolean(fieldRelativeMode);
 
   }
 
@@ -112,9 +117,9 @@ public class SwerveDrivetrain extends SubsystemBase {
    * @param fieldRelative Whether the provided x and y speeds are relative to the
    *                      field.
    */
-  public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
+  public void drive(double xSpeed, double ySpeed, double rot) {
     SwerveModuleState[] states = kinematics.toSwerveModuleStates(
-        fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d())
+        fieldRelativeMode ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d())
             : new ChassisSpeeds(xSpeed, ySpeed, rot));
 
     // fix speeds if kinematics exceed what the robot can actually do [lenght/s]
@@ -165,5 +170,13 @@ public class SwerveDrivetrain extends SubsystemBase {
     if ((modID < 0) || (modID > modules.length - 1))
       return null;
     return modules[modID];
+  }
+
+  public void toggleFieldRealitiveMode(){
+    if(fieldRelativeMode)
+      fieldRelativeMode = false;
+    else fieldRelativeMode = true;
+    fieldMode.setBoolean(fieldRelativeMode); 
+    return;
   }
 }

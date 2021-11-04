@@ -140,6 +140,7 @@ public class SwerveModuleMK3 {
       }
       sleep(100);
     }
+    System.out.println(myprefix + " Angle motor flash success.");
 
     CANError driveError = driveMotor.burnFlash();
     sleep(2000); //takes 1 sec to burn per Dean
@@ -153,7 +154,7 @@ public class SwerveModuleMK3 {
       }
       sleep(100);
     }
-
+    System.out.println(myprefix + " Drive motor flash success.");
     /*
      * setNTPrefix - causes the network table entries to be created and updated on
      * the periodic() call.
@@ -213,19 +214,11 @@ public class SwerveModuleMK3 {
       }
     }
     
-    counter = 0;
-    while(!realityCheckSparkMax(pos_deg, temp)){
-      counter++;
-      if(counter > 20) {
-        System.out.println("*** " + myprefix + " reality check failed over 20 tries ***");
-        break;
-      }
-      sleep(100);
-    }
+   realityCheckSparkMax(angleCmdInvert*pos_deg, temp);
 
   }
 
-  boolean realityCheckSparkMax(double angle_cancoder, double internal_angle) {
+  void realityCheckSparkMax(double angle_cancoder, double internal_angle) {
     boolean result = true;
 
     if (Math.abs(driveEncoder.getPositionConversionFactor() - 
@@ -250,13 +243,20 @@ public class SwerveModuleMK3 {
     }
     if (Math.abs(angleEncoder.getVelocityConversionFactor() - (360.0 / DriveTrain.kSteeringGR / 60)) > 0.1) {
       System.out.println("*** ERROR *** " + myprefix + " velocity conversion factor incorrect for angle");
+      System.out.println("Expected Angle Vel CF: " + (360.0 / DriveTrain.kSteeringGR / 60));
+      System.out.println("Returned Angle Vel CF: " + angleEncoder.getVelocityConversionFactor());
       result = false;
     }
     if (Math.abs(angle_cancoder - internal_angle) > 0.1) {
       System.out.println("*** ERROR *** " + myprefix + " angle encoder save error");
+      System.out.println("Expected internal angle: " + angle_cancoder);
+      System.out.println("Returned internal angle: " + internal_angle);
       result = false;
     }
-    return result;
+    if (result){
+      System.out.println(myprefix + "passed reality checks.");
+    }
+    return;
   }
 
   // _set<> for testing during bring up.
@@ -344,9 +344,10 @@ public class SwerveModuleMK3 {
    * @param desiredState - A SwerveModuleState representing the desired new state
    *                     of the module
    */
-  public void setDesiredState(SwerveModuleState desiredState) {
-    SwerveModuleState state = desiredState; 
-    SwerveModuleState.optimize(state,Rotation2d.fromDegrees(m_internalAngle));
+  public void setDesiredState(SwerveModuleState state) {
+    
+    SwerveModuleState.optimize(state,Rotation2d.fromDegrees(m_internalAngle)); //should favor reversing direction over turning > 90 degrees
+
     // use position control on angle with INTERNAL encoder, scaled internally for
     // degrees
     m_angle_target = state.angle.getDegrees();

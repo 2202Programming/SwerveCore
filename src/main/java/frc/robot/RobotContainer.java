@@ -4,11 +4,14 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants.DriverPrefs;
 import frc.robot.commands.SwerveDriveCommand;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
+import frc.robot.subsystems.hid.XboxButton;
+import frc.robot.subsystems.ifx.DriverControls.Id;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -36,7 +39,12 @@ public class RobotContainer {
     // set default commands
     drivetrain.setDefaultCommand(new SwerveDriveCommand(drivetrain, driverControls));
 
+    setDriverButtons();
     
+  }
+
+  void setDriverButtons(){
+    driverControls.bind(Id.Driver, XboxButton.B).whenPressed(new InstantCommand( drivetrain::toggleFieldRealitiveMode ));
   }
 
   // testing 
