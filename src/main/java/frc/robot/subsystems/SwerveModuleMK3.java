@@ -107,10 +107,10 @@ public class SwerveModuleMK3 {
     driveEncoder = driveMotor.getEncoder();
     // set driveEncoder to use ft/s
     driveEncoder.setPositionConversionFactor(Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR); // mo-rot to ft
-    driveEncoder.setVelocityConversionFactor(Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR / 60.0); // mo-rpm
+    driveEncoder.setVelocityConversionFactor((Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR) / 60.0); // mo-rpm
                                                                                                                // to
                                                                                                                // ft/s
-
+    sleep(100);
     // Angle Motor config
     angleMotor.setInverted(invertAngleMtr);
     angleMotor.setIdleMode(IdleMode.kBrake);
@@ -124,6 +124,7 @@ public class SwerveModuleMK3 {
     // SparkMax PID values
     DriveTrain.anglePIDF.copyTo(angleMotorPID, kSlot); // position mode
     DriveTrain.drivePIDF.copyTo(driveMotorPID, kSlot); // velocity mode
+    sleep(100);
 
     // burn the motor flash
     CANError angleError = angleMotor.burnFlash();
@@ -226,19 +227,28 @@ public class SwerveModuleMK3 {
 
   boolean realityCheckSparkMax(double angle_cancoder, double internal_angle) {
     boolean result = true;
-    if (driveEncoder.getPositionConversionFactor() != Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR) {
+
+    if (Math.abs(driveEncoder.getPositionConversionFactor() - 
+          Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR) > 0.1) {
       System.out.println("*** ERROR *** " + myprefix + " position conversion factor incorrect for drive");
+      System.out.println("Expected Position CF: " + Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR);
+      System.out.println("Returned Position CF: " + driveEncoder.getPositionConversionFactor());
       result = false;
     }
-    if (driveEncoder.getVelocityConversionFactor() != Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR / 60.0) {
+    if (Math.abs(driveEncoder.getVelocityConversionFactor() - 
+          Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR / 60.0) > 0.1) {
       System.out.println("*** ERROR *** " + myprefix + " velocity conversion factor incorrect for drive");
+      System.out.println("Expected Vel CF: " + Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR / 60.0);
+      System.out.println("Returned Vel CF: " + driveEncoder.getVelocityConversionFactor());
       result = false;
     }
-    if (angleEncoder.getPositionConversionFactor() != 360.0 / DriveTrain.kSteeringGR) {
+    if (Math.abs(angleEncoder.getPositionConversionFactor() - (360.0 / DriveTrain.kSteeringGR)) > 0.1) {
       System.out.println("*** ERROR *** " + myprefix + " position conversion factor incorrect for angle");
+      System.out.println("Expected Angle Pos CF: " + 360.0 / DriveTrain.kSteeringGR);
+      System.out.println("Returned Angle Pos CF: " + angleEncoder.getPositionConversionFactor());
       result = false;
     }
-    if (angleEncoder.getVelocityConversionFactor() != (360.0 / DriveTrain.kSteeringGR) / 60) {
+    if (Math.abs(angleEncoder.getVelocityConversionFactor() - (360.0 / DriveTrain.kSteeringGR / 60)) > 0.1) {
       System.out.println("*** ERROR *** " + myprefix + " velocity conversion factor incorrect for angle");
       result = false;
     }
@@ -335,8 +345,8 @@ public class SwerveModuleMK3 {
    *                     of the module
    */
   public void setDesiredState(SwerveModuleState desiredState) {
-    SwerveModuleState state = desiredState; // SwerveModuleState.optimize(desiredState,
-                                            // Rotation2d.fromDegrees(m_internalAngle));
+    SwerveModuleState state = desiredState; 
+    SwerveModuleState.optimize(state,Rotation2d.fromDegrees(m_internalAngle));
     // use position control on angle with INTERNAL encoder, scaled internally for
     // degrees
     m_angle_target = state.angle.getDegrees();

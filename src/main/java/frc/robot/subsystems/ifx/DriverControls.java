@@ -28,6 +28,8 @@ import frc.robot.subsystems.hid.XboxPOV;
  */
 public interface DriverControls extends Subsystem {
 
+  public boolean currentFieldRelativeSetting = false;
+
   public enum Id {
     Driver(0), Assistant(1), SwitchBoard(2), Phantom(3);
 
@@ -56,7 +58,8 @@ public interface DriverControls extends Subsystem {
   default public double getVelocityX()  { return 0.0; }
   default public double getVelocityY()  { return 0.0; }
   default public double getXYRotation() { return 0.0; }
-  default public boolean useFieldRelative() { return false; }
+  default public boolean useFieldRelative() { return true; }
+  
 
   // tank
   default public double getVelocityLeft()  { return 0.0; }
