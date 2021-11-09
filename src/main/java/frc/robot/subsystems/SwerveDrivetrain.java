@@ -11,11 +11,13 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.wpilibj.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
@@ -51,11 +53,16 @@ public class SwerveDrivetrain extends SubsystemBase {
       new Translation2d(-DriveTrain.XwheelOffset, DriveTrain.YwheelOffset), // Back Left
       new Translation2d(-DriveTrain.XwheelOffset, -DriveTrain.YwheelOffset) // Back Right
   );
+  private SwerveDriveOdometry m_odometry;
+  private Pose2d m_pose;
+  private SwerveModuleState[] states;
 
   // sensors and our mk3 modules
   private final Sensors_Subsystem sensors;
   private final Gyro gyro;
   private final SwerveModuleMK3[] modules;
+
+  
 
   private NetworkTable table;
   private NetworkTableEntry can_utilization;
@@ -92,6 +99,9 @@ public class SwerveDrivetrain extends SubsystemBase {
         new SwerveModuleMK3(new CANSparkMax(CAN.DT_BR_DRIVE, MT), new CANSparkMax(CAN.DT_BR_ANGLE, MT),
             DriveTrain.CC_BR_OFFSET, sensors.getCANCoder(EncoderID.BackRight), kAngleMotorInvert_Right,
             kAngleCmdInvert_Right, kDriveMotorInvert_Right, "BR") };
+
+    m_odometry = new SwerveDriveOdometry(kinematics, gyro.getRotation2d());
+  
     // for updating CAN status in periodic
     table = NetworkTableInstance.getDefault().getTable(NT_Name);
     can_utilization = table.getEntry("/CanUtilization");
@@ -118,7 +128,7 @@ public class SwerveDrivetrain extends SubsystemBase {
    *                      field.
    */
   public void drive(double xSpeed, double ySpeed, double rot) {
-    SwerveModuleState[] states = kinematics.toSwerveModuleStates(
+    states = kinematics.toSwerveModuleStates(
         fieldRelativeMode ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d())
             : new ChassisSpeeds(xSpeed, ySpeed, rot));
 
@@ -145,6 +155,10 @@ public class SwerveDrivetrain extends SubsystemBase {
     for (int i = 0; i < modules.length; i++) {
       modules[i].periodic();
     }
+
+    //update pose
+    m_pose = m_odometry.update(gyro.getRotation2d(), states);
+
     // updates CAN status data every 4 cycles
     timer++;
     if (timer == 5) {
