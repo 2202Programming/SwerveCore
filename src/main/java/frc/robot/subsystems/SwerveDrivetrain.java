@@ -193,4 +193,22 @@ public class SwerveDrivetrain extends SubsystemBase {
     fieldMode.setBoolean(fieldRelativeMode); 
     return;
   }
+
+  public void setPose(Pose2d new_pose) {
+    m_pose = new_pose;
+  }
+
+  public Pose2d getPose(){
+    return m_pose;
+  }
+
+  public SwerveDriveKinematics getKinematics(){
+    return kinematics;
+  }
+
+  public void setModuleStates(SwerveModuleState[] newStates)
+  {
+    states = newStates;
+  }
+
 }
