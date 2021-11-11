@@ -70,7 +70,7 @@ public class RobotContainer {
     driverControls.bind(Id.Driver, XboxButton.B).whenPressed(new InstantCommand( drivetrain::toggleFieldRealitiveMode ));
   
     //A - Trajectory Test
-    driverControls.bind(Id.Driver, XboxButton.A).whenPressed(getTrajectoryFollowTestCommand());
+    //driverControls.bind(Id.Driver, XboxButton.A).whenPressed(getTrajectoryFollowTestCommand());
   
 
   }
@@ -98,17 +98,17 @@ public class RobotContainer {
   }
 
   public Command getTrajectoryFollowTestCommand (){
-
+    System.out.println("Starting trajectory generation...");
     // An example trajectory to follow.  All units in meters.
     Trajectory exampleTrajectory =
       TrajectoryGenerator.generateTrajectory(
         new Pose2d(0.0, 0.0, new Rotation2d(-Math.PI / 2.0)),
         List.of(
           new Translation2d(0.0, -0.5),
-          new Translation2d(1.0, 0.5)
+          new Translation2d(1, 0)
         ),
-        new Pose2d(1.0, 0.0, new Rotation2d(Math.PI / 2.0)),
-        new TrajectoryConfig(1, 1) //max velocity, max accel
+        new Pose2d(1.0, 1.0, new Rotation2d(Math.PI / 2.0)),
+        new TrajectoryConfig(0.1, 0.05) //max velocity, max accel
       );
       
       SwerveControllerCommand swerveControllerCommand =
@@ -117,9 +117,9 @@ public class RobotContainer {
           drivetrain::getPose, // Functional interface to feed supplier
           drivetrain.getKinematics(),
           // Position controllers 
-          new PIDController(1.0, 0.0, 0.0),
-          new PIDController(1.0, 0.0, 0.0),
-          new ProfiledPIDController(1, 0, 0, new TrapezoidProfile.Constraints(6.28, 3.14)),
+          new PIDController(4.0, 0.0, 0.0),
+          new PIDController(4.0, 0.0, 0.0),
+          new ProfiledPIDController(4, 0, 0, new TrapezoidProfile.Constraints(.3, .3)),
             // Here, our rotation profile constraints were a max velocity
             // of 1 rotation per second and a max acceleration of 180 degrees
             // per second squared
@@ -129,8 +129,9 @@ public class RobotContainer {
         // Reset odometry to the starting pose of the trajectory.
     drivetrain.setPose(exampleTrajectory.getInitialPose());
 
+    System.out.println("Running Path...");
     // Run path following command, then stop at the end.
-    return swerveControllerCommand.andThen(() -> drivetrain.drive(0, 0, 0));
+    return swerveControllerCommand.andThen(() -> drivetrain.drive(0, 0, 0)).withTimeout(6);
 
   }
 }

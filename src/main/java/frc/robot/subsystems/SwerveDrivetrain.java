@@ -62,8 +62,6 @@ public class SwerveDrivetrain extends SubsystemBase {
   private final Gyro gyro;
   private final SwerveModuleMK3[] modules;
 
-  
-
   private NetworkTable table;
   private NetworkTableEntry can_utilization;
   private NetworkTableEntry busOffCount;
@@ -71,6 +69,9 @@ public class SwerveDrivetrain extends SubsystemBase {
   private NetworkTableEntry transmitErrorCount;
   private NetworkTableEntry txFullCount;
   private NetworkTableEntry fieldMode;
+  private NetworkTableEntry currentX;
+  private NetworkTableEntry currentY;
+  private NetworkTableEntry currentHeading;
 
   public final String NT_Name = "DT"; // expose data under DriveTrain table
   private int timer;
@@ -101,7 +102,8 @@ public class SwerveDrivetrain extends SubsystemBase {
             kAngleCmdInvert_Right, kDriveMotorInvert_Right, "BR") };
 
     m_odometry = new SwerveDriveOdometry(kinematics, gyro.getRotation2d());
-  
+    states = kinematics.toSwerveModuleStates(new ChassisSpeeds(0, 0, 0));
+
     // for updating CAN status in periodic
     table = NetworkTableInstance.getDefault().getTable(NT_Name);
     can_utilization = table.getEntry("/CanUtilization");
@@ -111,6 +113,9 @@ public class SwerveDrivetrain extends SubsystemBase {
     txFullCount = table.getEntry("/CanTxError");
     fieldMode = table.getEntry("/FieldRealitveMode");
     fieldMode.setBoolean(fieldRelativeMode);
+    currentX = table.getEntry("/Current X");
+    currentY = table.getEntry("/Current Y");
+    currentHeading = table.getEntry("/Current Heading");
 
   }
 
@@ -139,6 +144,7 @@ public class SwerveDrivetrain extends SubsystemBase {
     for (int i = 0; i < states.length; i++) {
       modules[i].setDesiredState(states[i]);
     }
+    
   }
 
   // used for testing
@@ -168,6 +174,9 @@ public class SwerveDrivetrain extends SubsystemBase {
       receiveErrorCount.setDouble(canStatus.receiveErrorCount);
       transmitErrorCount.setDouble(canStatus.transmitErrorCount);
       txFullCount.setDouble(canStatus.txFullCount);
+      currentX.setDouble(m_pose.getX());
+      currentY.setDouble(m_pose.getY());
+      currentHeading.setDouble(m_pose.getRotation().getDegrees());
       timer = 0;
     }
   }
@@ -206,9 +215,12 @@ public class SwerveDrivetrain extends SubsystemBase {
     return kinematics;
   }
 
+  //Sets module states and writes to modules
   public void setModuleStates(SwerveModuleState[] newStates)
   {
-    states = newStates;
+    // output the angle and velocity for each module
+    for (int i = 0; i < states.length; i++) {
+      modules[i].setDesiredState(newStates[i]);
+    }
   }
-
 }
