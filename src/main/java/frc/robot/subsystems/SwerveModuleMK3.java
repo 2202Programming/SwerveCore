@@ -91,7 +91,8 @@ public class SwerveModuleMK3 {
     driveMotor = driveMtr;
     angleMotor = angleMtr;
     absEncoder = absEnc;
-
+    myprefix = prefix;
+    
     // Always restore factory defaults - it removes gremlins
     driveMotor.restoreFactoryDefaults();
     angleMotor.restoreFactoryDefaults();
