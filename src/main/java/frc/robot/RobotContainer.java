@@ -70,7 +70,7 @@ public class RobotContainer {
     driverControls.bind(Id.Driver, XboxButton.B).whenPressed(new InstantCommand( drivetrain::toggleFieldRealitiveMode ));
   
     //A - Trajectory Test
-    //driverControls.bind(Id.Driver, XboxButton.A).whenPressed(getTrajectoryFollowTestCommand());
+    driverControls.bind(Id.Driver, XboxButton.A).whenPressed(getTrajectoryFollowTestCommand());
   
 
   }
@@ -98,8 +98,7 @@ public class RobotContainer {
   }
 
   public Command getTrajectoryFollowTestCommand (){
-    System.out.println("Starting trajectory generation...");
-    // An example trajectory to follow.  All units in meters.
+    // An example trajectory to follow.  All units in feet.
     Trajectory exampleTrajectory =
       TrajectoryGenerator.generateTrajectory(
         new Pose2d(0.0, 0.0, new Rotation2d(-Math.PI / 2.0)),
@@ -109,6 +108,8 @@ public class RobotContainer {
         ),
         new Pose2d(1.0, 1.0, new Rotation2d(Math.PI / 2.0)),
         new TrajectoryConfig(0.1, 0.05) //max velocity, max accel
+        //new TrajectoryConfig(Constants.DriveTrain.kMaxSpeed, Constants.DriveTrain.kMaxAngularSpeed) //way too fast
+        
       );
       
       SwerveControllerCommand swerveControllerCommand =
@@ -131,7 +132,7 @@ public class RobotContainer {
 
     System.out.println("Running Path...");
     // Run path following command, then stop at the end.
-    return swerveControllerCommand.andThen(() -> drivetrain.drive(0, 0, 0)).withTimeout(6);
+    return swerveControllerCommand.andThen(() -> drivetrain.drive(0, 0, 0)).withTimeout(10);
 
   }
 }

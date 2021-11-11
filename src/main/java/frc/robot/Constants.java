@@ -92,11 +92,11 @@ public final class Constants {
 
  
     public static final class RobotPhysical {
-        public static final double BUMPER_TO_LIDAR = 100; // mm 
-        public static final double LIDAR_TO_LIDAR = 348;  // mm 
+        // public static final double BUMPER_TO_LIDAR = 100; // mm 
+        // public static final double LIDAR_TO_LIDAR = 348;  // mm 
 
         //useful if we do modeling for tracking
-        public static final double Mass = 145;  // lbs with battery and code loaded
+       // public static final double Mass = 145;  // lbs with battery and code loaded
         
     }
 
@@ -108,10 +108,10 @@ public final class Constants {
      * 
      *    <subsys>.data  convention 
      */
-    public static final class LIDAR {
-        public static final double SAMPLE_mS = 20; // in ms
+    // public static final class LIDAR {
+    //     public static final double SAMPLE_mS = 20; // in ms
        
-    }
+    // }
 
     public static final class DriverPrefs {
         public static final double VelExpo = 0.3;        // non-dim [0.0 - 1.0]
