@@ -92,7 +92,7 @@ public class SwerveModuleMK3 {
     angleMotor = angleMtr;
     absEncoder = absEnc;
     myprefix = prefix;
-    
+
     // Always restore factory defaults - it removes gremlins
     driveMotor.restoreFactoryDefaults();
     angleMotor.restoreFactoryDefaults();
@@ -255,7 +255,7 @@ public class SwerveModuleMK3 {
       result = false;
     }
     if (result){
-      System.out.println(myprefix + "passed reality checks.");
+      System.out.println(myprefix + " passed reality checks.");
     }
     return;
   }
