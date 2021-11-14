@@ -127,6 +127,7 @@ public final class Constants {
         // Constraints on speeds enforeced in DriveTrain
         public static final double kMaxSpeed = 6.0; // [ft/s]
         public static final double kMaxAngularSpeed = Math.PI; // [rad/s] 1/2 rotation per second
+        //Max neo free speed is 12.1 ft/s per specs
 
         /****
          * ### REMINDER - enable these once we have basics working
@@ -165,7 +166,7 @@ public final class Constants {
         public static final double XwheelOffset = 10.5/12;     
         public static final double YwheelOffset = 10.5/12;
 
-        // Gear ratios
+        // Gear ratios - confirmed https://www.swervedrivespecialties.com/products/mk3-swerve-module?variant=39420433203313
         public static final double kSteeringGR = 12.8;   // [mo-turns to 1 angle wheel turn]
         public static final double kDriveGR = 8.16;      // [mo-turn to 1 drive wheel turn]
     }  
