@@ -56,6 +56,10 @@ public final class Constants {
         public static final int DT_FR_ANGLE = 27;
 
 
+        // Whether to burn flash or not
+        public static final boolean BURN_FLASH = false;
+
+
     }
 
     // PWM assignments on the Rio
