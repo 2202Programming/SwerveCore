@@ -56,6 +56,10 @@ public final class Constants {
         public static final int DT_FR_ANGLE = 27;
 
 
+        // Whether to burn flash or not
+        public static final boolean BURN_FLASH = false;
+
+
     }
 
     // PWM assignments on the Rio
@@ -92,11 +96,11 @@ public final class Constants {
 
  
     public static final class RobotPhysical {
-        public static final double BUMPER_TO_LIDAR = 100; // mm 
-        public static final double LIDAR_TO_LIDAR = 348;  // mm 
+        // public static final double BUMPER_TO_LIDAR = 100; // mm 
+        // public static final double LIDAR_TO_LIDAR = 348;  // mm 
 
         //useful if we do modeling for tracking
-        public static final double Mass = 145;  // lbs with battery and code loaded
+       // public static final double Mass = 145;  // lbs with battery and code loaded
         
     }
 
@@ -108,10 +112,10 @@ public final class Constants {
      * 
      *    <subsys>.data  convention 
      */
-    public static final class LIDAR {
-        public static final double SAMPLE_mS = 20; // in ms
+    // public static final class LIDAR {
+    //     public static final double SAMPLE_mS = 20; // in ms
        
-    }
+    // }
 
     public static final class DriverPrefs {
         public static final double VelExpo = 0.3;        // non-dim [0.0 - 1.0]
@@ -127,6 +131,7 @@ public final class Constants {
         // Constraints on speeds enforeced in DriveTrain
         public static final double kMaxSpeed = 6.0; // [ft/s]
         public static final double kMaxAngularSpeed = Math.PI; // [rad/s] 1/2 rotation per second
+        //Max neo free speed is 12.1 ft/s per specs
 
         /****
          * ### REMINDER - enable these once we have basics working
@@ -165,7 +170,7 @@ public final class Constants {
         public static final double XwheelOffset = 10.5/12;     
         public static final double YwheelOffset = 10.5/12;
 
-        // Gear ratios
+        // Gear ratios - confirmed https://www.swervedrivespecialties.com/products/mk3-swerve-module?variant=39420433203313
         public static final double kSteeringGR = 12.8;   // [mo-turns to 1 angle wheel turn]
         public static final double kDriveGR = 8.16;      // [mo-turn to 1 drive wheel turn]
     }  

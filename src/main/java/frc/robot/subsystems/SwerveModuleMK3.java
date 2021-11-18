@@ -14,6 +14,7 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
+import frc.robot.Constants;
 import frc.robot.Constants.DriveTrain;
 import frc.robot.util.ModMath;
 
@@ -109,8 +110,8 @@ public class SwerveModuleMK3 {
     // set driveEncoder to use ft/s
     driveEncoder.setPositionConversionFactor(Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR); // mo-rot to ft
     driveEncoder.setVelocityConversionFactor((Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR) / 60.0); // mo-rpm
-                                                                                                               // to
-                                                                                                               // ft/s
+    // to
+    // ft/s
     sleep(100);
     // Angle Motor config
     angleMotor.setInverted(invertAngleMtr);
@@ -127,35 +128,39 @@ public class SwerveModuleMK3 {
     DriveTrain.drivePIDF.copyTo(driveMotorPID, kSlot); // velocity mode
     sleep(100);
 
-    // burn the motor flash
-    CANError angleError = angleMotor.burnFlash();
-    sleep(2000); //takes 1 sec to burn per Dean
+    // burn the motor flash if BURN_FLASH is true in frc.robot.Constants.CAN
+    if (Constants.CAN.BURN_FLASH) {
+      CANError angleError = angleMotor.burnFlash();
+      sleep(1500); // takes 1 sec to burn per Dean
 
-    int counter = 0;
-    while (angleError.value != 0) {
-      System.out.println(prefix + " angle error: " + angleError.value);
-      counter++;
-      if (counter > 20) {
-        System.out.println("*** ERROR *** " + prefix + " Angle Motor Flash Failed.");
-        break;
+      int counter = 0;
+      while (angleError.value != 0) {
+        System.out.println(prefix + " angle error: " + angleError.value);
+        counter++;
+        if (counter > 20) {
+          System.out.println("*** ERROR *** " + prefix + " Angle Motor Flash Failed.");
+          break;
+        }
+        sleep(100);
       }
-      sleep(100);
-    }
-    System.out.println(myprefix + " Angle motor flash success.");
+      System.out.println(myprefix + " Angle motor flash success.");
 
-    CANError driveError = driveMotor.burnFlash();
-    sleep(2000); //takes 1 sec to burn per Dean
-    counter = 0;
-    while (driveError.value != 0) {
-      System.out.println(prefix + " drive error: " + driveError.value);
-      counter++;
-      if (counter > 20) {
-        System.out.println("*** ERROR *** " + prefix + " Drive Motor Flash Failed.");
-        break;
+      CANError driveError = driveMotor.burnFlash();
+      sleep(1500); // takes 1 sec to burn per Dean
+      counter = 0;
+      while (driveError.value != 0) {
+        System.out.println(prefix + " drive error: " + driveError.value);
+        counter++;
+        if (counter > 20) {
+          System.out.println("*** ERROR *** " + prefix + " Drive Motor Flash Failed.");
+          break;
+        }
+        sleep(100);
       }
-      sleep(100);
+      System.out.println(myprefix + " Drive motor flash success.");
+    } else {
+      System.out.println("Skipped burning flash.");
     }
-    System.out.println(myprefix + " Drive motor flash success.");
     /*
      * setNTPrefix - causes the network table entries to be created and updated on
      * the periodic() call.
@@ -204,33 +209,33 @@ public class SwerveModuleMK3 {
     sleep(100); // sparkmax gremlins
 
     int counter = 0;
-    while(Math.abs(pos_deg - temp) > 0.1) {  //keep trying to set encoder angle if it's not matching
+    while (Math.abs(pos_deg - temp) > 0.1) { // keep trying to set encoder angle if it's not matching
       angleEncoder.setPosition(angleCmdInvert * pos_deg);
       sleep(100); // sparkmax gremlins
       temp = angleEncoder.getPosition();
       sleep(100); // sparkmax gremlins
-      if (counter++ > 20){
+      if (counter++ > 20) {
         System.out.println("*** Angle position set failed after 20 tries ***");
         break;
       }
     }
-    
-   realityCheckSparkMax(angleCmdInvert*pos_deg, temp);
+
+    realityCheckSparkMax(angleCmdInvert * pos_deg, temp);
 
   }
 
   void realityCheckSparkMax(double angle_cancoder, double internal_angle) {
     boolean result = true;
 
-    if (Math.abs(driveEncoder.getPositionConversionFactor() - 
-          Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR) > 0.1) {
+    if (Math.abs(
+        driveEncoder.getPositionConversionFactor() - Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR) > 0.1) {
       System.out.println("*** ERROR *** " + myprefix + " position conversion factor incorrect for drive");
       System.out.println("Expected Position CF: " + Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR);
       System.out.println("Returned Position CF: " + driveEncoder.getPositionConversionFactor());
       result = false;
     }
-    if (Math.abs(driveEncoder.getVelocityConversionFactor() - 
-          Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR / 60.0) > 0.1) {
+    if (Math.abs(driveEncoder.getVelocityConversionFactor()
+        - Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR / 60.0) > 0.1) {
       System.out.println("*** ERROR *** " + myprefix + " velocity conversion factor incorrect for drive");
       System.out.println("Expected Vel CF: " + Math.PI * DriveTrain.wheelDiameter / DriveTrain.kDriveGR / 60.0);
       System.out.println("Returned Vel CF: " + driveEncoder.getVelocityConversionFactor());
@@ -254,7 +259,7 @@ public class SwerveModuleMK3 {
       System.out.println("Returned internal angle: " + internal_angle);
       result = false;
     }
-    if (result){
+    if (result) {
       System.out.println(myprefix + " passed reality checks.");
     }
     return;
@@ -294,7 +299,7 @@ public class SwerveModuleMK3 {
     m_internalAngle = angleEncoder.getPosition() * angleCmdInvert;
     m_velocity = driveEncoder.getVelocity();
 
-    //these are for human consumption, update slower
+    // these are for human consumption, update slower
     if (frameCounter++ == 10) {
       m_externalAngle = absEncoder.getAbsolutePosition();
       NTUpdate();
@@ -346,8 +351,9 @@ public class SwerveModuleMK3 {
    *                     of the module
    */
   public void setDesiredState(SwerveModuleState state) {
-    
-    SwerveModuleState.optimize(state,Rotation2d.fromDegrees(m_internalAngle)); //should favor reversing direction over turning > 90 degrees
+
+    SwerveModuleState.optimize(state, Rotation2d.fromDegrees(m_internalAngle)); // should favor reversing direction over
+                                                                                // turning > 90 degrees
 
     // use position control on angle with INTERNAL encoder, scaled internally for
     // degrees
