@@ -148,6 +148,7 @@ public class SwerveDrivetrain extends SubsystemBase {
     SwerveDriveKinematics.normalizeWheelSpeeds(states, DriveTrain.kMaxSpeed);
 
     // output the angle and velocity for each module
+    // Maybe should just call setModuleStates?
     for (int i = 0; i < states.length; i++) {
       modules[i].setDesiredState(states[i]);
     }
@@ -210,13 +211,13 @@ public class SwerveDrivetrain extends SubsystemBase {
     return;
   }
 
-  //sets X,Y but keeps current gryo angle
+  //sets X,Y, and sets current angle (will apply gyro correction)
   public void setPose(Pose2d new_pose) {
     m_pose = new_pose;
     m_odometry.resetPosition(m_pose, gyro.getRotation2d());
   }
 
-  //resets X,Y but keeps current gryo angle
+  //resets X,Y, and set current angle to be 0
   public void resetPose() {
     m_pose = new Pose2d(0,0,new Rotation2d(0));
     m_odometry.resetPosition(m_pose, gyro.getRotation2d());
@@ -233,10 +234,11 @@ public class SwerveDrivetrain extends SubsystemBase {
   //Sets module states and writes to modules
   public void setModuleStates(SwerveModuleState[] newStates)
   {
-    states = newStates;
+    states = newStates; //update drivetrain version of current states; used for odometery
+
     // output the angle and velocity for each module
     for (int i = 0; i < states.length; i++) {
-      modules[i].setDesiredState(states[i]);
+      modules[i].setDesiredState(states[i]); //updates the desired state at the module level
     }
   }
 }

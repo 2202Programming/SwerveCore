@@ -111,7 +111,7 @@ public class RobotContainer {
           // new Translation2d(0.0, 0.75)
         ),
         new Pose2d(0, 3.0, current_angle),
-        new TrajectoryConfig(1.0, 0.25) //max velocity, max accel
+        new TrajectoryConfig(2.0, 0.5) //max velocity, max accel
         //new TrajectoryConfig(Constants.DriveTrain.kMaxSpeed, Constants.DriveTrain.kMaxAngularSpeed) //way too fast
         
       );
