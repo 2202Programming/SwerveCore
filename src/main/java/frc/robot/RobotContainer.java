@@ -106,11 +106,12 @@ public class RobotContainer {
         
         new Pose2d(0.0, 0.0, current_angle),
         List.of(
-          // new Translation2d(0.0, -0.5),
-          // new Translation2d(1, 0)
+          // new Translation2d(0.0, 0.25),
+          // new Translation2d(0.0, 0.5),
+          // new Translation2d(0.0, 0.75)
         ),
-        new Pose2d(0, 1.0, current_angle),
-        new TrajectoryConfig(0.1, 0.05) //max velocity, max accel
+        new Pose2d(0, 3.0, current_angle),
+        new TrajectoryConfig(1.0, 0.25) //max velocity, max accel
         //new TrajectoryConfig(Constants.DriveTrain.kMaxSpeed, Constants.DriveTrain.kMaxAngularSpeed) //way too fast
         
       );
@@ -133,7 +134,6 @@ public class RobotContainer {
         // Reset odometry to the starting pose of the trajectory.
     drivetrain.setPose(exampleTrajectory.getInitialPose());
 
-    System.out.println("Running Path...");
     // Run path following command, then stop at the end.
     return swerveControllerCommand.andThen(() -> drivetrain.drive(0, 0, 0)).withTimeout(10);
 
