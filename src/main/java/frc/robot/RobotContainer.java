@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
@@ -62,6 +61,7 @@ public class RobotContainer {
   * <ul>
   * <li> B - Toggle field relative </li>
   * <li> A - Trajectory Follow Test </li>
+  * <li> Y - Reset Pose to Zero </li>
   * </ul>
   */
   void setDriverButtons(){
@@ -72,7 +72,8 @@ public class RobotContainer {
     //A - Trajectory Test
     driverControls.bind(Id.Driver, XboxButton.A).whenPressed(getTrajectoryFollowTestCommand());
   
-
+    //Y - reset Pose
+    driverControls.bind(Id.Driver, XboxButton.Y).whenPressed(new InstantCommand( drivetrain::resetPose ));
   }
 
     /**
@@ -99,14 +100,16 @@ public class RobotContainer {
 
   public Command getTrajectoryFollowTestCommand (){
     // An example trajectory to follow.  All units in feet.
+    Rotation2d current_angle = new Rotation2d(sensors.getYaw());
     Trajectory exampleTrajectory =
       TrajectoryGenerator.generateTrajectory(
-        new Pose2d(0.0, 0.0, new Rotation2d(-Math.PI / 2.0)),
+        
+        new Pose2d(0.0, 0.0, current_angle),
         List.of(
-          new Translation2d(0.0, -0.5),
-          new Translation2d(1, 0)
+          // new Translation2d(0.0, -0.5),
+          // new Translation2d(1, 0)
         ),
-        new Pose2d(1.0, 1.0, new Rotation2d(Math.PI / 2.0)),
+        new Pose2d(0, 1.0, current_angle),
         new TrajectoryConfig(0.1, 0.05) //max velocity, max accel
         //new TrajectoryConfig(Constants.DriveTrain.kMaxSpeed, Constants.DriveTrain.kMaxAngularSpeed) //way too fast
         
