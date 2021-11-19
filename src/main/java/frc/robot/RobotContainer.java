@@ -19,11 +19,13 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import frc.robot.Constants.DriverPrefs;
 import frc.robot.commands.SwerveDriveCommand;
+import frc.robot.commands.auto.auto_drivePath_cmd;
 import frc.robot.subsystems.Sensors_Subsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.hid.HID_Xbox_Subsystem;
 import frc.robot.subsystems.hid.XboxButton;
 import frc.robot.subsystems.ifx.DriverControls.Id;
+import frc.robot.ux.Dashboard;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -38,6 +40,7 @@ public class RobotContainer {
   public final HID_Xbox_Subsystem driverControls;
   public final Sensors_Subsystem sensors;
   private final SwerveDrivetrain drivetrain;
+  public final Dashboard dashboard;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -53,6 +56,10 @@ public class RobotContainer {
 
     setDriverButtons();
     setAssistantButtons();
+
+    //setup the dashboard programatically, creates any choosers, screens
+    dashboard = new Dashboard(this);
+
     
   }
 
@@ -62,6 +69,7 @@ public class RobotContainer {
   * <li> B - Toggle field relative </li>
   * <li> A - Trajectory Follow Test </li>
   * <li> Y - Reset Pose to Zero </li>
+  * <li> X - Follow path off chooser </li>
   * </ul>
   */
   void setDriverButtons(){
@@ -74,6 +82,9 @@ public class RobotContainer {
   
     //Y - reset Pose
     driverControls.bind(Id.Driver, XboxButton.Y).whenPressed(new InstantCommand( drivetrain::resetPose ));
+
+    //X - follow path off chooser
+    driverControls.bind(Id.Driver, XboxButton.X).whenPressed(new auto_drivePath_cmd(drivetrain, dashboard.getTrajectoryChooser()));
   }
 
     /**
