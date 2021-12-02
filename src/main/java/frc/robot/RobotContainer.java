@@ -54,11 +54,13 @@ public class RobotContainer {
     // set default commands
     drivetrain.setDefaultCommand(new SwerveDriveCommand(drivetrain, driverControls));
 
+    //setup the dashboard programatically, creates any choosers, screens
+    dashboard = new Dashboard(this);
+
     setDriverButtons();
     setAssistantButtons();
 
-    //setup the dashboard programatically, creates any choosers, screens
-    dashboard = new Dashboard(this);
+
 
     
   }
