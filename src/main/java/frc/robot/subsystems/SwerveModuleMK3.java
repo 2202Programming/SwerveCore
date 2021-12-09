@@ -351,10 +351,10 @@ public class SwerveModuleMK3 {
    *                     of the module
    */
   public void setDesiredState(SwerveModuleState state) {
-    SwerveModuleState opt_state = SwerveModuleState.optimize(state, Rotation2d.fromDegrees(m_internalAngle)); // should favor reversing direction over
+    SwerveModuleState m_state = SwerveModuleState.optimize(state, Rotation2d.fromDegrees(m_internalAngle)); // should favor reversing direction over
                                                                                 // turning > 90 degrees
 
-    state = opt_state;   //uncomment to use optimized angle command
+    state = m_state;   //uncomment to use optimized angle command
     // use position control on angle with INTERNAL encoder, scaled internally for
     // degrees
     m_angle_target = m_state.angle.getDegrees();
