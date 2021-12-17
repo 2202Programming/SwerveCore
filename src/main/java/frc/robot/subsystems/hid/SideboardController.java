@@ -44,6 +44,7 @@ public class SideboardController extends GenericHID {
     /** These functions are not supported by our sideboard but are required for GenericHID.
      *  so just retrun zero and log an error with the driverstation.
      */
+    /* CHANGED 2022: Appears to be getRawAxis() in new WPILib.
     @Override
     public double getX(Hand hand) {
         // doesn't exist on sideboard, return zero
@@ -56,6 +57,12 @@ public class SideboardController extends GenericHID {
         // doesn't exist on sideboard, return zero
         //DriverStation.reportError("getY() called on Sideboard", false);
         return 0;
+    }
+    */
+    // CHANGED 2022: replaced getX and getY with this
+    @Override
+    public double getRawAxis(int axis) {
+      return 0;
     }
 
 }

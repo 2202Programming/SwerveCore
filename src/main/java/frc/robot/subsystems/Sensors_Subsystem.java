@@ -21,7 +21,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import frc.robot.Constants.CAN;
 import frc.robot.subsystems.util.MonitoredSubsystemBase;
@@ -206,8 +206,8 @@ public class Sensors_Subsystem extends MonitoredSubsystemBase implements Gyro {
     nt_yaw_xrs450_dot.setDouble(m_yaw_xrs450_d);
 
     nt_yaw_blend.setDouble(m_yaw_blend);
-
-    CANJNI.GetCANStatus(m_canStatus);
+// CHANGED 2022: For some reason the method name is getCANStatus instead of GetCANStatus
+    CANJNI.getCANStatus(m_canStatus);
     nt_canUtilization.setDouble(m_canStatus.percentBusUtilization);
     nt_canRxError.setNumber(m_canStatus.receiveErrorCount);
     nt_canTxError.setNumber(m_canStatus.transmitErrorCount);
@@ -342,7 +342,7 @@ public class Sensors_Subsystem extends MonitoredSubsystemBase implements Gyro {
 
 
 /**
-   * Return the heading of the robot as a {@link edu.wpi.first.wpilibj.geometry.Rotation2d}.
+   * Return the heading of the robot as a {@link edu.wpi.first.math.geometry.Rotation2d}.
    *
    * <p>The angle is continuous, that is it will continue from 360 to 361 degrees. This allows
    * algorithms that wouldn't want to see a discontinuity in the gyro output as it sweeps past from
@@ -354,7 +354,7 @@ public class Sensors_Subsystem extends MonitoredSubsystemBase implements Gyro {
    * <p>This heading is based on integration of the returned rate from the gyro.
    *
    * @return the current heading of the robot as a {@link
-   *     edu.wpi.first.wpilibj.geometry.Rotation2d}.
+   *     edu.wpi.first.math.geometry.Rotation2d}.
    */
   @Override
   public Rotation2d getRotation2d() {

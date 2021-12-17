@@ -7,9 +7,12 @@ package frc.robot.commands.test;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder.BooleanConsumer;
+// import edu.wpi.first.util.WPIUtilJNI;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+// BooleanConsumer changed: new import, below old import
+import edu.wpi.first.util.function.BooleanConsumer;
+// import edu.wpi.first.wpiutil.sendable.SendableBuilder.BooleanConsumer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.subsystems.SwerveDrivetrain;

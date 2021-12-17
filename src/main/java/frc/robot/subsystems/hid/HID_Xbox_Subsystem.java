@@ -7,7 +7,7 @@
 
 package frc.robot.subsystems.hid;
 
-import edu.wpi.first.wpilibj.GenericHID.Hand;
+// import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -133,18 +133,18 @@ public class HID_Xbox_Subsystem extends MonitoredSubsystemBase implements Driver
      */
     // Driver inputs for acade style in normalized units,
     // left Y-stick throttle (forward negative) right X-stick turn rate
-    velShaper = new ExpoShaper(velExpo, () -> driver.getY(Hand.kLeft));
-    rotShaper = new ExpoShaper(rotExpo, () -> driver.getX(Hand.kRight)); 
+    velShaper = new ExpoShaper(velExpo, () -> driver.getLeftY());
+    rotShaper = new ExpoShaper(rotExpo, () -> driver.getRightX()); 
 
     // Tank drive Left/Right Y-axis used, forward stick is negative 
-    velLeftShaper = new ExpoShaper(velExpo,  () -> driver.getY(Hand.kLeft));
-    velRightShaper = new ExpoShaper(velExpo, () -> driver.getY(Hand.kRight));
+    velLeftShaper = new ExpoShaper(velExpo,  () -> driver.getLeftY());
+    velRightShaper = new ExpoShaper(velExpo, () -> driver.getRightY());
 
     // XYRot or Swerve Drive
     // Rotation on Left-X axis,  X-Y throttle on Right
-    velXShaper = new ExpoShaper(velExpo,  () -> driver.getY(Hand.kRight)); // X robot is Y axis on Joystick
-    velYShaper = new ExpoShaper(velExpo,  () -> driver.getX(Hand.kRight)); // Y robot is X axis on Joystick
-    swRotShaper = new ExpoShaper(rotExpo, () -> driver.getX(Hand.kLeft));  
+    velXShaper = new ExpoShaper(velExpo,  () -> driver.getRightY()); // X robot is Y axis on Joystick
+    velYShaper = new ExpoShaper(velExpo,  () -> driver.getRightX()); // Y robot is X axis on Joystick
+    swRotShaper = new ExpoShaper(rotExpo, () -> driver.getLeftX());  
     fieldRelativeButton = bindButton(Id.Driver, XboxButton.LB.value); 
     fieldRel = new ActionOnEdge("field-relative", fieldRelativeButton);
 
@@ -162,8 +162,9 @@ public class HID_Xbox_Subsystem extends MonitoredSubsystemBase implements Driver
     swRotShaper.setDeadzone(deadzone);
 
     // read some values to remove unused warning
-    assistant.getX();
-    switchBoard.getX();
+    // CHANGED for 2022
+    assistant.getRightX();
+    switchBoard.getRawAxis(0);
 
     // read initial buttons for each device - maybe used for configurions
     initDriverButtons = getButtonsRaw(Id.Driver);
