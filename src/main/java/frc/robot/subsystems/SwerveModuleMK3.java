@@ -2,12 +2,12 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.CANCoderConfiguration;
-import com.revrobotics.CANEncoder;
-import com.revrobotics.CANError;
-import com.revrobotics.CANPIDController;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.REVLibError;
+import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.ControlType;
+import com.revrobotics.CANSparkMax.ControlType;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -30,10 +30,10 @@ public class SwerveModuleMK3 {
   // Rev devices
   private final CANSparkMax driveMotor;
   private final CANSparkMax angleMotor;
-  private final CANPIDController driveMotorPID;
-  private final CANPIDController angleMotorPID; // sparkmax PID can only use internal NEO encoders
-  private final CANEncoder angleEncoder; // aka internalAngle
-  private final CANEncoder driveEncoder;
+  private final SparkMaxPIDController driveMotorPID;
+  private final SparkMaxPIDController angleMotorPID; // sparkmax PID can only use internal NEO encoders
+  private final RelativeEncoder angleEncoder; // aka internalAngle
+  private final RelativeEncoder driveEncoder;
   // CTRE devices
   private final CANCoder absEncoder; // aka externalAngle (external to Neo/Smartmax)
   private double angleCmdInvert;
@@ -130,7 +130,7 @@ public class SwerveModuleMK3 {
 
     // burn the motor flash if BURN_FLASH is true in frc.robot.Constants.CAN
     if (Constants.CAN.BURN_FLASH) {
-      CANError angleError = angleMotor.burnFlash();
+      REVLibError angleError = angleMotor.burnFlash();
       sleep(1500); // takes 1 sec to burn per Dean
 
       int counter = 0;
@@ -145,7 +145,7 @@ public class SwerveModuleMK3 {
       }
       System.out.println(myprefix + " Angle motor flash success.");
 
-      CANError driveError = driveMotor.burnFlash();
+      REVLibError driveError = driveMotor.burnFlash();
       sleep(1500); // takes 1 sec to burn per Dean
       counter = 0;
       while (driveError.value != 0) {
