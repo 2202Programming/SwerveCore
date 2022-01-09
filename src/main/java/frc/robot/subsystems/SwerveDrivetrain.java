@@ -145,7 +145,7 @@ public class SwerveDrivetrain extends SubsystemBase {
             : new ChassisSpeeds(xSpeed, ySpeed, rot));
 
     // fix speeds if kinematics exceed what the robot can actually do [lenght/s]
-    SwerveDriveKinematics.normalizeWheelSpeeds(states, DriveTrain.kMaxSpeed);
+    //SwerveDriveKinematics.normalizeWheelSpeeds(states, DriveTrain.kMaxSpeed);
 
     // output the angle and velocity for each module
     // Maybe should just call setModuleStates?
