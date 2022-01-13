@@ -85,7 +85,11 @@ public class KBSimStick extends GenericHID {
   /**
    * Hand doesn't make sense for this stick, but the GenericHid requires it.
    * Returning the best value we can.
+   * */ /*
+   * CHANGED 2022: Removing methods. These can be substitued with different methods.
    */
+
+   /*
   @Override
   public double getX(final Hand hand) {
     return getAxis(Axis.kX);
@@ -95,7 +99,7 @@ public class KBSimStick extends GenericHID {
   public double getY(final Hand hand) {
     return getAxis(Axis.kY);
   }
-
+  */
 
   /**
    * There are a ton of buttons on the stick, so just use a general reader.

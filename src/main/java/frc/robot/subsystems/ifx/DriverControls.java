@@ -88,7 +88,7 @@ public interface DriverControls extends Subsystem {
    * Use and/or logic to decode as needed.
    */
   public default int getButtonsRaw(Id id) {
-    return DriverStation.getInstance().getStickButtons(id.value);
+    return DriverStation.getStickButtons(id.value);
   }
 
   /**
